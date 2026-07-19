@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Whack-a-Mole, a browser game built with semantic HTML, CSS, and JavaScript."
+    />
+    <title>Whack-a-Mole</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>Whack-a-Mole</h1>
+      <p>
+        A reaction game. Moles appear at random across a three-by-three board,
+        and each one you hit before it disappears adds to your score.
+      </p>
+    </header>
+
+    <main>
+      <section aria-labelledby="scoreboard-heading">
+        <h2 id="scoreboard-heading">Scoreboard</h2>
+        <ul>
+          <li>
+            <label for="score">Score</label>
+            <output id="score" name="score">0</output>
+          </li>
+          <li>
+            <label for="time-remaining">Time Remaining</label>
+            <output id="time-remaining" name="time-remaining">60</output>
+            seconds
+          </li>
+          <li>
+            <label for="best-score">Best Score</label>
+            <output id="best-score" name="best-score">0</output>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="settings-heading">
+        <h2 id="settings-heading">Game Settings</h2>
+        <form>
+          <p>
+            <label for="difficulty">Difficulty</label>
+            <select id="difficulty" name="difficulty">
+              <option value="easy">Easy</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Hard</option>
+            </select>
+          </p>
+          <p>
+            <input type="checkbox" id="sound" name="sound" checked />
+            <label for="sound">Sound</label>
+          </p>
+        </form>
+      </section>
+
+      <section aria-labelledby="controls-heading">
+        <h2 id="controls-heading">Game Controls</h2>
+        <p>
+          <button type="button" id="start-game">Start Game</button>
+          <button type="button" id="restart-game" disabled>Restart Game</button>
+        </p>
+      </section>
+
+      <section aria-labelledby="status-heading">
+        <h2 id="status-heading">Game Status</h2>
+        <output id="game-status" name="game-status" role="status">Ready to start.</output>
+      </section>
+
+      <section aria-labelledby="board-heading">
+        <h2 id="board-heading">Game Board</h2>
+        <ul id="board">
+          <li><button type="button" disabled>Hole 1</button></li>
+          <li><button type="button" disabled>Hole 2</button></li>
+          <li><button type="button" disabled>Hole 3</button></li>
+          <li><button type="button" disabled>Hole 4</button></li>
+          <li><button type="button" disabled>Hole 5</button></li>
+          <li><button type="button" disabled>Hole 6</button></li>
+          <li><button type="button" disabled>Hole 7</button></li>
+          <li><button type="button" disabled>Hole 8</button></li>
+          <li><button type="button" disabled>Hole 9</button></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="instructions-heading">
+        <h2 id="instructions-heading">How to Play</h2>
+        <ol>
+          <li>Choose a difficulty and decide whether sound is on.</li>
+          <li>Select Start Game to begin a timed round.</li>
+          <li>Hit each mole that appears before it disappears again.</li>
+          <li>
+            Use the mouse, a touch screen, or the keyboard. Tab moves between
+            holes, and Enter or Space hits the selected hole.
+          </li>
+          <li>The round ends when the time remaining reaches zero.</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <p>Whack-a-Mole is a browser game built with HTML, CSS, and JavaScript.</p>
+    </footer>
+  </body>
+</html>

@@ -7,23 +7,23 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 1 (documentation and roadmap) is complete. There is no application to run yet; the game is built from
-Milestone 2 onward.
+Milestone 2 (semantic static HTML) is complete. The interface is intentionally unstyled and has no behaviour yet:
+styling arrives in Milestone 3 and interactivity in Milestone 4.
 
-## Planned project structure
+## Project structure
 
-None of these files exist yet. They are added across milestones 2–4:
+Files not yet written are listed with the milestone that introduces them:
 
 ```
-index.html        semantic markup           (milestone 2)
+index.html        semantic markup           (complete)
 styles/main.css   responsive layout         (milestone 3)
 src/              JavaScript ES modules     (milestone 4 onward)
 ```
 
 ## Running locally
 
-From Milestone 2 onward, once `index.html` exists. ES modules require an HTTP origin, so serve the project rather
-than opening it via the `file://` protocol:
+Open `index.html` directly, or serve it. Later milestones use ES modules, which require an HTTP origin rather
+than the `file://` protocol:
 
 ```sh
 python3 -m http.server 8000
@@ -34,7 +34,7 @@ Then visit <http://localhost:8000>.
 ## Roadmap
 
 - [x] **Milestone 1 — Documentation and roadmap.** Project README, incremental workflow rules, repository setup.
-- [ ] **Milestone 2 — Semantic static HTML.** Accessible page structure and game board markup.
+- [x] **Milestone 2 — Semantic static HTML.** Accessible page structure and game board markup.
 - [ ] **Milestone 3 — Responsive CSS layout.** Board grid, styling, responsive behaviour.
 - [ ] **Milestone 4 — Minimal JavaScript initialization.** ES module entry point wired to the DOM.
 - [ ] **Milestone 5 — Random mole appearance.** Game state and randomised mole timing.
