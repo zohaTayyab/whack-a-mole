@@ -269,6 +269,47 @@
   box-shadow: inset 0 0.35rem 0.6rem rgb(0 0 0 / 0.45);
 }
 
+/* The mole. Drawn with CSS only: a rounded body with eyes and a snout, always
+   present but hidden until the cycle reveals it, so the reveal can transition.
+   Mole colours live here because base.css is unchanged in this milestone. */
+.board {
+  --color-mole: #9a7350;
+  --color-mole-edge: #402f22;
+  --color-mole-face: #f4ece0;
+}
+
+.hole::after {
+  content: "";
+  position: absolute;
+  bottom: 24%;
+  left: 50%;
+  width: 40%;
+  height: 40%;
+  background-color: var(--color-mole);
+  background-image: radial-gradient(
+      circle at 32% 34%,
+      var(--color-mole-edge) 0 13%,
+      transparent 13%
+    ),
+    radial-gradient(circle at 68% 34%, var(--color-mole-edge) 0 13%, transparent 13%),
+    radial-gradient(circle at 50% 66%, var(--color-mole-face) 0 20%, transparent 20%);
+  border: 2px solid var(--color-mole-edge);
+  border-radius: 50% 50% 42% 42%;
+  opacity: 0;
+  /* Scale only. A vertical slide would carry the mole outside the opening
+     while it fades. */
+  transform: translateX(-50%) scale(0.55);
+  transition: opacity var(--motion-duration) ease,
+    transform var(--motion-duration) ease;
+}
+
+/* Shape and size change together with the fill, so the mole is distinguishable
+   without relying on colour alone. */
+.hole[data-mole-visible="true"]::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
 .hole:not(:disabled):hover {
   background-color: var(--color-grass-deep);
   transform: translateY(-2px);

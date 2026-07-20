@@ -7,20 +7,20 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 4 (JavaScript initialization) is complete. The application now starts as an ES module and prepares the
-interface, but gameplay is not yet implemented: scoring, timing, mole appearance, and the game controls arrive in
-Milestones 5 to 8.
+Milestone 5 (random mole appearance) is complete. Selecting Start Game makes moles appear in random holes, one at
+a time. Scoring, hit detection, the countdown, restart, difficulty, sound, and best-score persistence are not
+implemented yet; they arrive in Milestones 6 to 8.
 
 ## Project structure
 
-Files not yet written are listed with the milestone that introduces them:
-
 ```
-index.html        semantic markup           (complete)
-styles/base.css   tokens, resets, utilities (complete)
-styles/game.css   layout and components     (complete)
-scripts/main.js   application entry point   (complete)
-scripts/ui.js     interface initialization  (complete)
+index.html            semantic markup             (complete)
+styles/base.css       tokens, resets, utilities   (complete)
+styles/game.css       layout and components       (complete)
+scripts/main.js       application entry point     (complete)
+scripts/ui.js         interface and rendering     (complete)
+scripts/config.js     mole-cycle configuration    (complete)
+scripts/mole-cycle.js mole appearance scheduling  (complete)
 ```
 
 ## Running locally
@@ -40,7 +40,7 @@ Then visit <http://localhost:8000>.
 - [x] **Milestone 2 — Semantic static HTML.** Accessible page structure and game board markup.
 - [x] **Milestone 3 — Responsive CSS layout.** Board grid, styling, responsive behaviour.
 - [x] **Milestone 4 — Minimal JavaScript initialization.** ES module entry point wired to the DOM.
-- [ ] **Milestone 5 — Random mole appearance.** Game state and randomised mole timing.
+- [x] **Milestone 5 — Random mole appearance.** Game state and randomised mole timing.
 - [ ] **Milestone 6 — Hit detection and scoring.** Mouse, touch, and keyboard input; score tracking.
 - [ ] **Milestone 7 — Timer and game lifecycle.** Start, countdown, end, and reset.
 - [ ] **Milestone 8 — Best score, difficulty, and sound.** Persistence, difficulty ramp, audio feedback.
