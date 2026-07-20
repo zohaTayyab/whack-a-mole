@@ -7,8 +7,9 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 3 (responsive CSS layout) is complete. The interface is styled and responsive, but has no behaviour
-yet: interactivity arrives in Milestone 4.
+Milestone 4 (JavaScript initialization) is complete. The application now starts as an ES module and prepares the
+interface, but gameplay is not yet implemented: scoring, timing, mole appearance, and the game controls arrive in
+Milestones 5 to 8.
 
 ## Project structure
 
@@ -18,13 +19,14 @@ Files not yet written are listed with the milestone that introduces them:
 index.html        semantic markup           (complete)
 styles/base.css   tokens, resets, utilities (complete)
 styles/game.css   layout and components     (complete)
-src/              JavaScript ES modules     (milestone 4 onward)
+scripts/main.js   application entry point   (complete)
+scripts/ui.js     interface initialization  (complete)
 ```
 
 ## Running locally
 
-Open `index.html` directly, or serve it. Later milestones use ES modules, which require an HTTP origin rather
-than the `file://` protocol:
+The page loads ES modules, which browsers only allow over an HTTP origin, so serve the project rather than
+opening `index.html` from the `file://` protocol:
 
 ```sh
 python3 -m http.server 8000
@@ -37,7 +39,7 @@ Then visit <http://localhost:8000>.
 - [x] **Milestone 1 — Documentation and roadmap.** Project README, incremental workflow rules, repository setup.
 - [x] **Milestone 2 — Semantic static HTML.** Accessible page structure and game board markup.
 - [x] **Milestone 3 — Responsive CSS layout.** Board grid, styling, responsive behaviour.
-- [ ] **Milestone 4 — Minimal JavaScript initialization.** ES module entry point wired to the DOM.
+- [x] **Milestone 4 — Minimal JavaScript initialization.** ES module entry point wired to the DOM.
 - [ ] **Milestone 5 — Random mole appearance.** Game state and randomised mole timing.
 - [ ] **Milestone 6 — Hit detection and scoring.** Mouse, touch, and keyboard input; score tracking.
 - [ ] **Milestone 7 — Timer and game lifecycle.** Start, countdown, end, and reset.
