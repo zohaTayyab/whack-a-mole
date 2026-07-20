@@ -7,8 +7,8 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 2 (semantic static HTML) is complete. The interface is intentionally unstyled and has no behaviour yet:
-styling arrives in Milestone 3 and interactivity in Milestone 4.
+Milestone 3 (responsive CSS layout) is complete. The interface is styled and responsive, but has no behaviour
+yet: interactivity arrives in Milestone 4.
 
 ## Project structure
 
@@ -16,7 +16,8 @@ Files not yet written are listed with the milestone that introduces them:
 
 ```
 index.html        semantic markup           (complete)
-styles/main.css   responsive layout         (milestone 3)
+styles/base.css   tokens, resets, utilities (complete)
+styles/game.css   layout and components     (complete)
 src/              JavaScript ES modules     (milestone 4 onward)
 ```
 
@@ -35,7 +36,7 @@ Then visit <http://localhost:8000>.
 
 - [x] **Milestone 1 — Documentation and roadmap.** Project README, incremental workflow rules, repository setup.
 - [x] **Milestone 2 — Semantic static HTML.** Accessible page structure and game board markup.
-- [ ] **Milestone 3 — Responsive CSS layout.** Board grid, styling, responsive behaviour.
+- [x] **Milestone 3 — Responsive CSS layout.** Board grid, styling, responsive behaviour.
 - [ ] **Milestone 4 — Minimal JavaScript initialization.** ES module entry point wired to the DOM.
 - [ ] **Milestone 5 — Random mole appearance.** Game state and randomised mole timing.
 - [ ] **Milestone 6 — Hit detection and scoring.** Mouse, touch, and keyboard input; score tracking.
