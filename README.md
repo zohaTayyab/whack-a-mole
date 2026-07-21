@@ -65,7 +65,9 @@ Then visit <http://localhost:8000>.
 - [x] **Milestone 6 — Hit detection and scoring.** Mouse, touch, and keyboard input; score tracking.
 - [x] **Milestone 7 — Timer and game lifecycle.** Start, countdown, end, and reset.
 - [x] **Milestone 8 — Best score, difficulty, and sound.** Persistence, difficulty ramp, audio feedback.
-- [ ] **Milestone 9 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
-- [ ] **Milestone 10 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.
+- [ ] **Milestone 9 — Theme, hammer, and volume.** Light and dark themes, a hammer cursor and strike, and a
+      background-music volume control.
+- [ ] **Milestone 10 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
+- [ ] **Milestone 11 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.
 
 Milestones are implemented one at a time, each leaving the application in a working state.
