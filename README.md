@@ -7,20 +7,25 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 5 (random mole appearance) is complete. Selecting Start Game makes moles appear in random holes, one at
-a time. Scoring, hit detection, the countdown, restart, difficulty, sound, and best-score persistence are not
-implemented yet; they arrive in Milestones 6 to 8.
+Milestone 6 (hit detection and scoring) is complete. Selecting Start Game makes moles appear in random holes, one
+at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard adds one point. Each mole
+counts at most once.
+
+The countdown, restart, the game-over state, best-score persistence, difficulty behaviour, and sound are not
+implemented yet; they arrive in Milestones 7 and 8. Time Remaining and Best Score currently show fixed values,
+and the Difficulty and Sound controls have no effect on play.
 
 ## Project structure
 
 ```
-index.html            semantic markup             (complete)
-styles/base.css       tokens, resets, utilities   (complete)
-styles/game.css       layout and components       (complete)
-scripts/main.js       application entry point     (complete)
-scripts/ui.js         interface and rendering     (complete)
-scripts/config.js     mole-cycle configuration    (complete)
-scripts/mole-cycle.js mole appearance scheduling  (complete)
+index.html                 semantic markup             (complete)
+styles/base.css            tokens, resets, utilities   (complete)
+styles/game.css            layout and components       (complete)
+scripts/main.js            application entry point     (complete)
+scripts/ui.js              interface and rendering     (complete)
+scripts/config.js          mole-cycle configuration    (complete)
+scripts/mole-cycle.js      mole appearance scheduling  (complete)
+scripts/game-controller.js input handling and scoring  (complete)
 ```
 
 ## Running locally
@@ -41,7 +46,7 @@ Then visit <http://localhost:8000>.
 - [x] **Milestone 3 — Responsive CSS layout.** Board grid, styling, responsive behaviour.
 - [x] **Milestone 4 — Minimal JavaScript initialization.** ES module entry point wired to the DOM.
 - [x] **Milestone 5 — Random mole appearance.** Game state and randomised mole timing.
-- [ ] **Milestone 6 — Hit detection and scoring.** Mouse, touch, and keyboard input; score tracking.
+- [x] **Milestone 6 — Hit detection and scoring.** Mouse, touch, and keyboard input; score tracking.
 - [ ] **Milestone 7 — Timer and game lifecycle.** Start, countdown, end, and reset.
 - [ ] **Milestone 8 — Best score, difficulty, and sound.** Persistence, difficulty ramp, audio feedback.
 - [ ] **Milestone 9 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.

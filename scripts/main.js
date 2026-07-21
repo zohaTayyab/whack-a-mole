@@ -1,30 +1,19 @@
 /* Application entry point. Module scripts are deferred, so the interface is
    ready to initialize as soon as this module runs. */
 
-import {
-  hideMoles,
-  initializeInterface,
-  onStartGame,
-  setStartGameEnabled,
-  setStatusMessage,
-  showMoleAt,
-} from "./ui.js";
+import { hideMoles, initializeInterface, showMoleAt } from "./ui.js";
 import { createMoleCycle } from "./mole-cycle.js";
-
-const MOLES_APPEARING_MESSAGE = "Moles are appearing.";
+import { createGameController } from "./game-controller.js";
 
 if (initializeInterface()) {
   const moleCycle = createMoleCycle({ showMole: showMoleAt, hideMole: hideMoles });
+  const gameController = createGameController({ moleCycle });
 
-  onStartGame(() => {
-    moleCycle.start();
-    setStartGameEnabled(false);
-    setStatusMessage(MOLES_APPEARING_MESSAGE);
-  });
+  gameController.connect();
 
-  /* Release the pending timeout when the page goes away. Pausing while merely
-     hidden belongs to the game-lifecycle milestone. */
+  /* Release the listeners and the pending timeout when the page goes away.
+     Pausing while merely hidden belongs to the game-lifecycle milestone. */
   window.addEventListener("pagehide", () => {
-    moleCycle.stop();
+    gameController.disconnect();
   });
 }

@@ -15,11 +15,18 @@ const SELECTORS = {
   board: "#board",
 };
 
+const HOLE_LABEL_SELECTOR = ".visually-hidden";
+
 const READY_MESSAGE = "Ready to start.";
 const SETUP_FAILED_MESSAGE = "The game could not be set up. Please reload the page.";
 const MOLE_VISIBLE_ATTRIBUTE = "moleVisible";
+/* Appended to a hole's authored name so the mole is announced as part of the
+   button's own accessible name rather than through the live status region. */
+const MOLE_VISIBLE_NAME_SUFFIX = ", mole visible";
 
 let elements = null;
+let holeActivationListener = null;
+let startGameListener = null;
 
 /**
  * Resolves every required element once so later work never re-queries the DOM.
@@ -51,6 +58,16 @@ function findElements() {
       `Expected ${HOLE_COUNT} mole-hole buttons but found ${found.holes.length}.`
     );
   }
+
+  found.holeLabels = found.holes.map((hole) => hole.querySelector(HOLE_LABEL_SELECTOR));
+
+  if (found.holeLabels.some((label) => label === null)) {
+    throw new Error("Every mole-hole button must contain a label element.");
+  }
+
+  /* The authored names are the source of truth, so the visible-mole suffix can
+     always be removed without guessing what the name used to be. */
+  found.holeNames = found.holeLabels.map((label) => label.textContent.trim());
 
   return found;
 }
@@ -100,11 +117,6 @@ export function initializeInterface() {
   }
 }
 
-/** @returns {HTMLButtonElement[]} the validated hole buttons, in board order */
-export function getHoles() {
-  return elements ? elements.holes : [];
-}
-
 /**
  * Shows a mole in one hole. Any previously visible mole is cleared first, so
  * only one mole is ever visible.
@@ -119,6 +131,8 @@ export function showMoleAt(holeIndex) {
   const hole = elements.holes[holeIndex];
   if (hole) {
     hole.dataset[MOLE_VISIBLE_ATTRIBUTE] = "true";
+    elements.holeLabels[holeIndex].textContent =
+      elements.holeNames[holeIndex] + MOLE_VISIBLE_NAME_SUFFIX;
   }
 }
 
@@ -129,9 +143,70 @@ export function hideMoles() {
     return;
   }
 
-  for (const hole of elements.holes) {
+  elements.holes.forEach((hole, index) => {
     delete hole.dataset[MOLE_VISIBLE_ATTRIBUTE];
+    elements.holeLabels[index].textContent = elements.holeNames[index];
+  });
+}
+
+/** Enables or disables all nine mole-hole buttons together. */
+export function setHolesEnabled(isEnabled) {
+  if (!elements) {
+    return;
   }
+
+  for (const hole of elements.holes) {
+    hole.disabled = !isEnabled;
+  }
+}
+
+/* Resolves the board position of whatever was selected. The label span is the
+   usual event target, so the enclosing button is what identifies the hole. */
+function findHoleIndex(eventTarget) {
+  if (!(eventTarget instanceof Element)) {
+    return -1;
+  }
+
+  return elements.holes.indexOf(eventTarget.closest("button"));
+}
+
+/**
+ * Registers the single hole-activation handler. One delegated click listener
+ * serves mouse, touch, pen, Enter, and Space, so no activation is counted
+ * twice.
+ *
+ * @param {(holeIndex: number) => void} handler called with the selected hole
+ */
+export function onHoleActivate(handler) {
+  if (!elements || holeActivationListener) {
+    return;
+  }
+
+  holeActivationListener = (event) => {
+    const holeIndex = findHoleIndex(event.target);
+    if (holeIndex !== -1) {
+      handler(holeIndex);
+    }
+  };
+
+  elements.board.addEventListener("click", holeActivationListener);
+}
+
+export function offHoleActivate() {
+  if (!elements || !holeActivationListener) {
+    return;
+  }
+
+  elements.board.removeEventListener("click", holeActivationListener);
+  holeActivationListener = null;
+}
+
+export function setScore(score) {
+  if (!elements) {
+    return;
+  }
+
+  elements.score.textContent = String(score);
 }
 
 /* Game Status is a live region, so an unchanged message is left alone to avoid
@@ -155,9 +230,19 @@ export function setStartGameEnabled(isEnabled) {
 }
 
 export function onStartGame(handler) {
-  if (!elements) {
+  if (!elements || startGameListener) {
     return;
   }
 
-  elements.startGame.addEventListener("click", handler);
+  startGameListener = handler;
+  elements.startGame.addEventListener("click", startGameListener);
+}
+
+export function offStartGame() {
+  if (!elements || !startGameListener) {
+    return;
+  }
+
+  elements.startGame.removeEventListener("click", startGameListener);
+  startGameListener = null;
 }

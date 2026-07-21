@@ -224,6 +224,10 @@
 
 .status__message {
   display: block;
+  /* Two lines are reserved because status messages differ in length: without
+     this the panel would resize mid-round and shift the board under the
+     player. The factor is the inherited line height. */
+  min-block-size: calc(2 * 1.6em);
   color: var(--color-primary-strong);
   font-size: var(--text-lg);
   font-weight: 500;
