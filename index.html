@@ -78,6 +78,33 @@
               >Sound</label
             >
           </p>
+          <p class="field">
+            <label class="field__label" for="music-volume">Music Volume</label>
+            <input
+              class="field__range"
+              type="range"
+              id="music-volume"
+              name="music-volume"
+              min="0"
+              max="100"
+              step="5"
+              value="100"
+            />
+            <span class="field__reading" id="music-volume-value">100%</span>
+          </p>
+          <p class="field">
+            <input
+              class="checkbox"
+              type="checkbox"
+              id="dark-theme"
+              name="dark-theme"
+            />
+            <label
+              class="field__label field__label--checkbox"
+              for="dark-theme"
+              >Dark theme</label
+            >
+          </p>
         </form>
       </section>
 
@@ -158,6 +185,13 @@
             </button>
           </li>
         </ul>
+        <!-- Decoration only: it carries no information the game does not
+             already give in text, so it is hidden from assistive technology
+             and never receives pointer events. -->
+        <div class="hammer" id="hammer" aria-hidden="true">
+          <span class="hammer__handle"></span>
+          <span class="hammer__head"></span>
+        </div>
       </section>
 
       <section class="panel instructions" aria-labelledby="instructions-heading">

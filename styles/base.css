@@ -1,25 +1,31 @@
 /* Design tokens, element defaults, and shared utilities. */
 
 :root {
-  color-scheme: light;
+  /* Both schemes are supported, so the browser styles form controls,
+     scrollbars, and other built-in interface to match. */
+  color-scheme: light dark;
 
-  /* Palette: warm neutrals with moss green and soil brown. */
-  --color-canvas: #f2efe6;
-  --color-surface: #fffdf8;
-  --color-surface-sunken: #e6e1d3;
-  --color-border: #d5cebd;
-  --color-text: #2b2823;
-  --color-text-muted: #55503f;
-  --color-primary: #2c6647;
-  --color-primary-strong: #1f4c34;
-  --color-on-primary: #ffffff;
-  --color-accent: #8a4f14;
-  --color-grass: #7aa363;
-  --color-grass-deep: #628a4c;
-  --color-grass-muted: #a3b795;
-  --color-soil: #4a3728;
-  --color-soil-muted: #6d6152;
-  --color-focus: #1b4bb8;
+  /* Palette: warm neutrals with moss green and soil brown, given once as a
+     light and a dark value. Which one applies follows the used colour scheme,
+     so there is a single source of truth for every colour and no duplicated
+     block to keep in step. Dark avoids pure black surfaces and pure white
+     text, both of which glare against a large coloured board. */
+  --color-canvas: light-dark(#f2efe6, #16140f);
+  --color-surface: light-dark(#fffdf8, #211e18);
+  --color-surface-sunken: light-dark(#e6e1d3, #2b2721);
+  --color-border: light-dark(#d5cebd, #423d34);
+  --color-text: light-dark(#2b2823, #f0eadd);
+  --color-text-muted: light-dark(#55503f, #b5ad9c);
+  --color-primary: light-dark(#2c6647, #7fb896);
+  --color-primary-strong: light-dark(#1f4c34, #a5d3b6);
+  --color-on-primary: light-dark(#ffffff, #10231a);
+  --color-accent: light-dark(#8a4f14, #e2a86a);
+  --color-grass: light-dark(#7aa363, #4a6b41);
+  --color-grass-deep: light-dark(#628a4c, #5b8250);
+  --color-grass-muted: light-dark(#a3b795, #3b463a);
+  --color-soil: light-dark(#4a3728, #17110c);
+  --color-soil-muted: light-dark(#6d6152, #2e2921);
+  --color-focus: light-dark(#1b4bb8, #8ab4ff);
 
   /* Typography */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
@@ -43,13 +49,25 @@
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
   --radius-lg: 1rem;
-  --shadow-sm: 0 1px 2px rgb(43 40 35 / 0.08);
+  /* A dark surface needs a deeper shadow to read as raised at all. */
+  --shadow-sm: 0 1px 2px light-dark(rgb(43 40 35 / 0.08), rgb(0 0 0 / 0.5));
 
   /* Motion. Overridden to zero under prefers-reduced-motion. */
   --motion-duration: 150ms;
 
   /* Minimum interactive target, ~44px. */
   --target-min: 2.75rem;
+}
+
+/* An explicit choice pins the scheme; without one the tokens above follow the
+   operating system, which is what keeps the first paint correct with no
+   scripting involved and therefore no flash of the wrong theme. */
+:root[data-theme="light"] {
+  color-scheme: only light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: only dark;
 }
 
 *,
@@ -77,6 +95,18 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: 1.6;
+}
+
+/* Colour only, so switching theme never moves or resizes anything. Shares the
+   motion token, which reduced motion already sets to zero.
+
+   Deliberately withheld until the page has painted once: a stored preference
+   that disagrees with the operating system is corrected as the page loads, and
+   without this that correction would be animated, turning a single frame into
+   a long visible fade from the wrong theme to the right one. */
+:root[data-theme-ready] body {
+  transition: background-color var(--motion-duration) ease,
+    color var(--motion-duration) ease;
 }
 
 h1,

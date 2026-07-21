@@ -5,6 +5,12 @@
    The audio context is created lazily, from the user interaction that first
    needs it, because browsers refuse to start audio any other way. */
 
+import {
+  DEFAULT_MUSIC_VOLUME,
+  MAX_MUSIC_VOLUME,
+  MIN_MUSIC_VOLUME,
+} from "./config.js";
+
 const TWO_PI = Math.PI * 2;
 const A4_MIDI = 69;
 const A4_HZ = 440;
@@ -201,6 +207,9 @@ export function createAudioController({ createContext = defaultContextFactory() 
   let musicSource = null;
   let enabled = false;
   let disposed = false;
+  /* Held here as a percentage so a volume chosen before any audio exists is
+     not lost: it is applied to the gain node the moment one is built. */
+  let musicVolume = DEFAULT_MUSIC_VOLUME;
   /* Set when the context turns out to be unusable, so a browser that offers
      the constructor but cannot actually play is not asked twice. */
   let unusable = false;
@@ -223,7 +232,7 @@ export function createAudioController({ createContext = defaultContextFactory() 
         masterGain = context.createGain();
         masterGain.connect(context.destination);
         musicGain = context.createGain();
-        musicGain.gain.value = MUSIC_LEVEL;
+        musicGain.gain.value = musicGainValue();
         musicGain.connect(masterGain);
       } catch (error) {
         context = null;
@@ -247,6 +256,13 @@ export function createAudioController({ createContext = defaultContextFactory() 
     }
 
     return context;
+  }
+
+  /* Full volume is the level the music was already mixed and tested at, so the
+     control only ever attenuates from MUSIC_LEVEL and can never push the mix
+     louder than it was measured to be safe at. */
+  function musicGainValue() {
+    return MUSIC_LEVEL * (musicVolume / MAX_MUSIC_VOLUME);
   }
 
   function releaseEffect(entry) {
@@ -335,6 +351,34 @@ export function createAudioController({ createContext = defaultContextFactory() 
 
   return {
     isSupported,
+
+    /**
+     * Sets the background-music volume as a whole percentage. Effects keep
+     * their own level: this is a music control, not a master one.
+     *
+     * @param {number} volume 0 to 100; anything else is ignored
+     */
+    setMusicVolume(volume) {
+      if (
+        !Number.isFinite(volume) ||
+        volume < MIN_MUSIC_VOLUME ||
+        volume > MAX_MUSIC_VOLUME
+      ) {
+        return;
+      }
+
+      musicVolume = volume;
+
+      /* Applied to the existing node, so the loop keeps playing rather than
+         restarting at the new level. */
+      if (musicGain !== null) {
+        try {
+          musicGain.gain.value = musicGainValue();
+        } catch (error) {
+          /* A closed context. The value is kept for the next one. */
+        }
+      }
+    },
 
     /**
      * Turns sound on or off. Turning it off silences the music at once and

@@ -173,6 +173,42 @@
   accent-color: var(--color-primary);
 }
 
+/* The range keeps its native behaviour and its native thumb; only the track
+   width and the accent are set, so mouse, touch, and keyboard all still work
+   exactly as the browser intends. */
+.field__range {
+  flex: 1 1 6rem;
+  min-width: 5rem;
+  min-height: var(--target-min);
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+/* The percentage beside the slider. A plain reading, not a live region: it
+   restates what the slider already reports. */
+.field__reading {
+  min-width: 3ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* Disabled controls take the same explicit sunken surface as a disabled
+   button rather than a blanket opacity, so their text keeps a measured
+   contrast ratio instead of whatever a fade happens to produce. */
+.field__control:disabled,
+.field__range:disabled,
+.checkbox:disabled {
+  accent-color: var(--color-soil-muted);
+  cursor: not-allowed;
+}
+
+.field__control:disabled {
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+}
+
 /* Controls */
 
 .controls__actions {
@@ -276,11 +312,23 @@
 
 /* The mole. Drawn with CSS only: a rounded body with eyes and a snout, always
    present but hidden until the cycle reveals it, so the reveal can transition.
-   Mole colours live here because base.css is unchanged in this milestone. */
+   The dark values keep the mole a warm brown against a darker opening, so it
+   stays as easy to pick out as it is in light. */
 .board {
-  --color-mole: #9a7350;
-  --color-mole-edge: #402f22;
-  --color-mole-face: #f4ece0;
+  /* The dark body is kept a shade deeper than the light one so the pale face
+     marks still read against it: those marks, not the body colour, are what
+     make the mole a recognisable shape rather than a coloured blob. */
+  --color-mole: light-dark(#9a7350, #9c7452);
+  --color-mole-edge: light-dark(#402f22, #2a1d13);
+  --color-mole-face: light-dark(#f4ece0, #f8f2e7);
+}
+
+/* While the hammer is following the pointer it stands in for the cursor. Only
+   ever set while the hammer is actually visible and working, so the pointer is
+   never simply missing. */
+.board[data-hammer-cursor="true"],
+.board[data-hammer-cursor="true"] .hole:not(:disabled) {
+  cursor: none;
 }
 
 .hole::after {
@@ -336,6 +384,145 @@
 @media (min-width: 30rem) {
   .board {
     gap: var(--space-xs);
+  }
+}
+
+/* Hammer
+
+   One decorative overlay, drawn entirely from two boxes and a gradient. It is
+   positioned against the board panel and never takes pointer events, so it can
+   sit over the holes without intercepting a single click. */
+
+.board-panel {
+  position: relative;
+}
+
+.hammer {
+  --hammer-head: light-dark(#c1372f, #d4534a);
+  --hammer-band: light-dark(#e0a52c, #edbb50);
+  --hammer-handle: light-dark(#b98463, #caa084);
+  --hammer-edge: light-dark(#7d1f1a, #4a1512);
+  --hammer-spark: light-dark(#e07b1f, #ffb54d);
+  --hammer-size: clamp(2.5rem, 7vw, 3.75rem);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: var(--hammer-size);
+  height: var(--hammer-size);
+  /* Decoration must never intercept an activation: every hit stays a real
+     click on the button underneath. */
+  pointer-events: none;
+  visibility: hidden;
+  /* Position rides on `translate` and the swing on `transform`, so the strike
+     animation can own rotation outright without either overwriting the other. */
+  translate: calc(var(--hammer-x, 0px) - (var(--hammer-size) * 0.3))
+    calc(var(--hammer-y, 0px) - (var(--hammer-size) * 0.8));
+  /* The handle end is the pivot, so the head swings down onto the hole the
+     pointer is over. */
+  transform-origin: 15% 85%;
+  transform: rotate(-38deg);
+}
+
+.hammer[data-hammer-visible="true"] {
+  visibility: visible;
+}
+
+.hammer__head {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 62%;
+  height: 44%;
+  background-color: var(--hammer-head);
+  /* The band reads as a separate ring rather than a stripe of the same
+     material, which is what makes the shape recognisable at this size. */
+  background-image: linear-gradient(
+    to right,
+    transparent 0 38%,
+    var(--hammer-band) 38% 56%,
+    transparent 56%
+  );
+  border: 2px solid var(--hammer-edge);
+  border-radius: 0.25rem;
+}
+
+.hammer__handle {
+  position: absolute;
+  right: 8%;
+  bottom: 6%;
+  width: 46%;
+  height: 15%;
+  background-color: var(--hammer-handle);
+  border: 2px solid var(--hammer-edge);
+  border-radius: 0.2rem;
+  transform: rotate(38deg);
+  transform-origin: 100% 50%;
+}
+
+/* The strike: the hammer swings down, and an impact burst appears under the
+   head. Both are driven by one attribute so a strike cannot half-apply. */
+.hammer[data-hammer-striking="true"] {
+  animation: hammer-strike var(--hammer-strike-duration, 220ms) ease-in-out;
+}
+
+.hammer[data-hammer-striking="true"]::after {
+  content: "";
+  position: absolute;
+  right: 4%;
+  bottom: 2%;
+  width: 55%;
+  height: 55%;
+  background: radial-gradient(
+    circle,
+    var(--hammer-spark) 0 38%,
+    transparent 62%
+  );
+  animation: hammer-spark var(--hammer-strike-duration, 220ms) ease-out;
+}
+
+@keyframes hammer-strike {
+  0% {
+    transform: rotate(-38deg);
+  }
+  45% {
+    transform: rotate(4deg);
+  }
+  100% {
+    transform: rotate(-38deg);
+  }
+}
+
+@keyframes hammer-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+/* Reduced motion keeps the feedback but removes the travel: the hammer simply
+   appears struck for a moment instead of swinging into place. */
+@media (prefers-reduced-motion: reduce) {
+  .hammer[data-hammer-striking="true"],
+  .hammer[data-hammer-striking="true"]::after {
+    animation: none;
+  }
+
+  .hammer[data-hammer-striking="true"] {
+    transform: rotate(0deg);
+  }
+
+  .hammer[data-hammer-striking="true"]::after {
+    opacity: 1;
   }
 }
 

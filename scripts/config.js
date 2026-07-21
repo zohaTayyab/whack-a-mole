@@ -6,6 +6,13 @@ export const HOLE_COUNT = 9;
    is the same length at every difficulty. */
 export const ROUND_DURATION_SECONDS = 60;
 
+/* Music volume as a whole percentage. The default is full, because full means
+   the level the music was already mixed and tested at rather than a louder
+   one: the control attenuates from there. */
+export const DEFAULT_MUSIC_VOLUME = 100;
+export const MIN_MUSIC_VOLUME = 0;
+export const MAX_MUSIC_VOLUME = 100;
+
 /* Difficulty changes how long a mole stays visible, which is the reaction time
    the player actually has. The gap between appearances moves with it so the
    board never feels either empty or frantic, and every gap stays long enough

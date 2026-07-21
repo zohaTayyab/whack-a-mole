@@ -3,24 +3,33 @@
    is played under, and the round lifecycle; the other modules each answer for
    one thing and hold no game state. */
 
-import { ROUND_DURATION_SECONDS, difficultyProfile, resolveDifficulty } from "./config.js";
+import {
+  DEFAULT_MUSIC_VOLUME,
+  ROUND_DURATION_SECONDS,
+  difficultyProfile,
+  resolveDifficulty,
+} from "./config.js";
 import {
   applyControls,
+  getMusicVolume,
   getSelectedDifficulty,
   getSoundEnabled,
   offDifficultyChange,
   offDocumentVisibilityChange,
   offHoleActivate,
+  offMusicVolumeChange,
   offRestartGame,
   offSoundChange,
   offStartGame,
   onDifficultyChange,
   onDocumentVisibilityChange,
   onHoleActivate,
+  onMusicVolumeChange,
   onRestartGame,
   onSoundChange,
   onStartGame,
   setBestScore,
+  setMusicVolume,
   setScore,
   setSoundAvailable,
   setStatusMessage,
@@ -77,10 +86,17 @@ function gameOverMessage(score, isNewRecord) {
  * Creates the game controller.
  *
  * @param {{moleCycle: Object, roundTimer: Object, bestScoreStore: Object,
- *   audio: Object}} parts
+ *   audio: Object, preferences: Object, hammer: Object}} parts
  * @returns {{connect: () => void, disconnect: () => void}}
  */
-export function createGameController({ moleCycle, roundTimer, bestScoreStore, audio }) {
+export function createGameController({
+  moleCycle,
+  roundTimer,
+  bestScoreStore,
+  audio,
+  preferences,
+  hammer,
+}) {
   let state = RoundState.Ready;
   let score = STARTING_SCORE;
   /* The difficulty the current round is being played under. It is captured
@@ -98,15 +114,26 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
     applyControls(CONTROLS_BY_STATE[nextState]);
   }
 
-  /* Sound is the one part of the game that depends on hardware and on a
-     browser policy that can refuse at any moment. Every audio call goes
-     through here so that a failure costs the player the sound and nothing
-     else: the round, the score, and the countdown carry on. */
-  function withSound(operation) {
+  /* Sound, the hammer, and stored settings are comforts rather than the game:
+     each depends on something the browser may withhold, whether an audio
+     device, a pointer, or storage. Every call into them goes through here, so
+     a failure costs the player that one comfort and nothing else. The round,
+     the score, and the countdown carry on regardless. */
+  function optional(operation) {
     try {
       operation();
     } catch (error) {
-      /* Play continues in silence. */
+      /* Play continues without it. */
+    }
+  }
+
+  /* The reading equivalent: a settings store that cannot answer should leave
+     the game at its documented default rather than stop it. */
+  function preferredMusicVolume() {
+    try {
+      return preferences.readMusicVolume();
+    } catch (error) {
+      return DEFAULT_MUSIC_VOLUME;
     }
   }
 
@@ -127,12 +154,13 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
        one. */
     roundTimer.stop();
     moleCycle.stop();
+    optional(() => hammer.deactivate());
 
     /* Audio is prepared before the round is, not after. Creating the audio
        context is slow the first time and the browser only allows it from this
        activation, so doing it here means the countdown and the first mole both
        begin once it is over, rather than losing their first moments to it. */
-    withSound(() => {
+    optional(() => {
       audio.stopRoundMusic();
       audio.setEnabled(getSoundEnabled());
       audio.playRoundStart();
@@ -149,6 +177,7 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
     enterState(RoundState.Running);
     setStatusMessage(IN_PROGRESS_MESSAGE);
 
+    optional(() => hammer.activate());
     moleCycle.start();
     roundTimer.start({
       onTick: (secondsRemaining) => {
@@ -171,7 +200,8 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
 
     roundTimer.stop();
     moleCycle.stop();
-    withSound(() => audio.stopRoundMusic());
+    optional(() => hammer.deactivate());
+    optional(() => audio.stopRoundMusic());
     setTimeRemaining(0);
 
     /* Only a completed round is recorded, so an abandoned or restarted round
@@ -179,7 +209,7 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
     const isNewRecord = bestScoreStore.recordBestScore(activeDifficulty, score);
     showBestScoreFor(activeDifficulty);
     setStatusMessage(gameOverMessage(score, isNewRecord));
-    withSound(() => audio.playGameOver());
+    optional(() => audio.playGameOver());
   }
 
   function handleStartGame() {
@@ -204,14 +234,30 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
   }
 
   function handleHoleActivation(holeIndex) {
-    if (state !== RoundState.Running || !moleCycle.attemptHit(holeIndex)) {
+    if (state !== RoundState.Running) {
+      return;
+    }
+
+    /* The hammer swings for the attempt, not for the outcome, so a miss looks
+       like a miss rather than like nothing happening. It is decoration and is
+       kept clear of the decision below. */
+    optional(() => hammer.strikeHole(holeIndex));
+
+    if (!moleCycle.attemptHit(holeIndex)) {
       return;
     }
 
     score += POINTS_PER_HIT;
     setScore(score);
     setStatusMessage(hitMessage(score));
-    withSound(() => audio.playHit());
+    optional(() => audio.playHit());
+  }
+
+  function handleMusicVolumeChange() {
+    const volume = getMusicVolume();
+    setMusicVolume(volume);
+    optional(() => preferences.recordMusicVolume(volume));
+    optional(() => audio.setMusicVolume(volume));
   }
 
   /* Outside a round the difficulty selection only decides which best score is
@@ -230,7 +276,7 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
   function handleSoundChange() {
     const wantsSound = getSoundEnabled();
 
-    withSound(() => {
+    optional(() => {
       audio.setEnabled(wantsSound);
 
       if (wantsSound && state === RoundState.Running) {
@@ -246,7 +292,8 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
       enterState(RoundState.Paused);
       roundTimer.pause();
       moleCycle.pause();
-      withSound(() => audio.stopRoundMusic());
+      optional(() => hammer.deactivate());
+      optional(() => audio.stopRoundMusic());
       setStatusMessage(PAUSED_MESSAGE);
       return;
     }
@@ -255,12 +302,13 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
       enterState(RoundState.Running);
       roundTimer.resume();
       moleCycle.resume();
+      optional(() => hammer.activate());
       setStatusMessage(RESUMED_MESSAGE);
 
       /* The context already exists from the activation that began the round,
          so continuing the loop needs no new permission. */
       if (getSoundEnabled()) {
-        withSound(() => audio.startRoundMusic());
+        optional(() => audio.startRoundMusic());
       }
     }
   }
@@ -271,17 +319,26 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
       /* The controller owns the lifecycle, so it asserts the controls for the
          state it is in rather than assuming the markup already matches. */
       applyControls(CONTROLS_BY_STATE[state]);
-      withSound(() => {
+      optional(() => {
         setSoundAvailable(audio.isSupported());
         audio.setEnabled(getSoundEnabled());
       });
+
+      /* The stored volume is shown and handed to the audio before any context
+         exists, so it is already in force the first time music plays. */
+      const volume = preferredMusicVolume();
+      setMusicVolume(volume);
+      optional(() => audio.setMusicVolume(volume));
+
       showBestScoreFor(resolveDifficulty(getSelectedDifficulty()));
+      optional(() => hammer.connect());
 
       onStartGame(handleStartGame);
       onRestartGame(handleRestartGame);
       onHoleActivate(handleHoleActivation);
       onDifficultyChange(handleDifficultyChange);
       onSoundChange(handleSoundChange);
+      onMusicVolumeChange(handleMusicVolumeChange);
       onDocumentVisibilityChange(handleVisibilityChange);
     },
 
@@ -292,10 +349,12 @@ export function createGameController({ moleCycle, roundTimer, bestScoreStore, au
       offHoleActivate();
       offDifficultyChange();
       offSoundChange();
+      offMusicVolumeChange();
       offDocumentVisibilityChange();
       roundTimer.stop();
       moleCycle.stop();
-      withSound(() => audio.dispose());
+      optional(() => hammer.disconnect());
+      optional(() => audio.dispose());
       /* Nothing responds after disposal, so the controls say so. */
       enterState(RoundState.Disposed);
     },

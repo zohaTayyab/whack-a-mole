@@ -1,7 +1,7 @@
 /* Owns every DOM reference: locates the interface elements, applies the
    documented pre-game state, and renders mole visibility. */
 
-import { HOLE_COUNT } from "./config.js";
+import { DEFAULT_MUSIC_VOLUME, HOLE_COUNT } from "./config.js";
 
 const SELECTORS = {
   score: "#score",
@@ -9,10 +9,14 @@ const SELECTORS = {
   bestScore: "#best-score",
   difficulty: "#difficulty",
   sound: "#sound",
+  musicVolume: "#music-volume",
+  musicVolumeValue: "#music-volume-value",
+  darkTheme: "#dark-theme",
   startGame: "#start-game",
   restartGame: "#restart-game",
   gameStatus: "#game-status",
   board: "#board",
+  hammer: "#hammer",
 };
 
 const HOLE_LABEL_SELECTOR = ".visually-hidden";
@@ -30,6 +34,10 @@ let startGameListener = null;
 let restartGameListener = null;
 let difficultyListener = null;
 let soundListener = null;
+let musicVolumeListener = null;
+let darkThemeListener = null;
+let boardPointerMoveListener = null;
+let boardPointerLeaveListener = null;
 let visibilityListener = null;
 
 /**
@@ -347,6 +355,12 @@ export function offSoundChange() {
  * checkbox is cleared as well as disabled, so its state stays truthful rather
  * than offering sound that will never arrive.
  */
+/**
+ * Reflects whether the browser can play sound at all. When it cannot, the
+ * checkbox is cleared as well as disabled, so its state stays truthful rather
+ * than offering sound that will never arrive. Music Volume goes with it,
+ * because a volume for music that cannot play is meaningless.
+ */
 export function setSoundAvailable(isAvailable) {
   if (!elements) {
     return;
@@ -357,6 +371,236 @@ export function setSoundAvailable(isAvailable) {
   }
 
   elements.sound.disabled = !isAvailable;
+  elements.musicVolume.disabled = !isAvailable;
+}
+
+/** @returns {number} the selected music volume as a whole percentage */
+export function getMusicVolume() {
+  return elements ? Number(elements.musicVolume.value) : DEFAULT_MUSIC_VOLUME;
+}
+
+/* The percentage is a plain reading beside the slider, not a live region: the
+   range already reports its own value to assistive technology, so announcing
+   it a second time would only talk over the player. */
+export function setMusicVolume(volume) {
+  if (!elements) {
+    return;
+  }
+
+  elements.musicVolume.value = String(volume);
+  elements.musicVolumeValue.textContent = `${volume}%`;
+}
+
+export function onMusicVolumeChange(handler) {
+  if (!elements || musicVolumeListener) {
+    return;
+  }
+
+  musicVolumeListener = handler;
+  /* "input" rather than "change", so dragging the slider is heard as it moves
+     rather than only when it is released. */
+  elements.musicVolume.addEventListener("input", musicVolumeListener);
+}
+
+export function offMusicVolumeChange() {
+  if (!elements || !musicVolumeListener) {
+    return;
+  }
+
+  elements.musicVolume.removeEventListener("input", musicVolumeListener);
+  musicVolumeListener = null;
+}
+
+/** @returns {boolean} whether the dark-theme checkbox is ticked */
+export function getDarkThemeSelected() {
+  return elements ? elements.darkTheme.checked : false;
+}
+
+export function setDarkThemeSelected(isDark) {
+  if (!elements) {
+    return;
+  }
+
+  elements.darkTheme.checked = isDark === true;
+}
+
+/**
+ * Pins the document to one theme. The stylesheet follows the operating system
+ * until this attribute appears, so it is only ever set for a deliberate
+ * choice.
+ */
+export function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+}
+
+/* Marks the point after which a theme change is a deliberate one and may be
+   animated. Until then a change is the page settling on the right theme, which
+   should simply be right rather than fade into place. */
+export function markThemeSettled() {
+  document.documentElement.dataset.themeReady = "true";
+}
+
+export function onDarkThemeChange(handler) {
+  if (!elements || darkThemeListener) {
+    return;
+  }
+
+  darkThemeListener = handler;
+  elements.darkTheme.addEventListener("change", darkThemeListener);
+}
+
+export function offDarkThemeChange() {
+  if (!elements || !darkThemeListener) {
+    return;
+  }
+
+  elements.darkTheme.removeEventListener("change", darkThemeListener);
+  darkThemeListener = null;
+}
+
+/* Hammer view. The hammer is decoration, so these helpers only ever move it,
+   show it, or strike it; none of them can reach the score or the mole cycle. */
+
+const HAMMER_VISIBLE_ATTRIBUTE = "hammerVisible";
+const HAMMER_STRIKING_ATTRIBUTE = "hammerStriking";
+const HAMMER_CURSOR_ATTRIBUTE = "hammerCursor";
+
+export function setHammerVisible(isVisible) {
+  if (!elements) {
+    return;
+  }
+
+  if (isVisible) {
+    elements.hammer.dataset[HAMMER_VISIBLE_ATTRIBUTE] = "true";
+  } else {
+    delete elements.hammer.dataset[HAMMER_VISIBLE_ATTRIBUTE];
+  }
+}
+
+export function setHammerStriking(isStriking) {
+  if (!elements) {
+    return;
+  }
+
+  if (isStriking) {
+    elements.hammer.dataset[HAMMER_STRIKING_ATTRIBUTE] = "true";
+  } else {
+    delete elements.hammer.dataset[HAMMER_STRIKING_ATTRIBUTE];
+  }
+}
+
+/* The native cursor is only hidden while the hammer is actually standing in
+   for it, so the pointer is never simply missing. */
+export function setHammerCursor(isHidden) {
+  if (!elements) {
+    return;
+  }
+
+  if (isHidden) {
+    elements.board.dataset[HAMMER_CURSOR_ATTRIBUTE] = "true";
+  } else {
+    delete elements.board.dataset[HAMMER_CURSOR_ATTRIBUTE];
+  }
+}
+
+/* Position is handed to the stylesheet as two custom properties rather than as
+   layout values, so where the hammer sits relative to its own artwork stays a
+   styling decision. Coordinates are viewport-based and converted here, because
+   this module owns the elements they are measured against. */
+export function positionHammerAt(viewportX, viewportY) {
+  if (!elements) {
+    return;
+  }
+
+  const panel = elements.hammer.parentElement;
+  if (!panel) {
+    return;
+  }
+
+  const bounds = panel.getBoundingClientRect();
+  elements.hammer.style.setProperty("--hammer-x", `${viewportX - bounds.left}px`);
+  elements.hammer.style.setProperty("--hammer-y", `${viewportY - bounds.top}px`);
+}
+
+/**
+ * @param {number} holeIndex
+ * @returns {{x: number, y: number}|null} the viewport centre of a hole, or
+ *   null when the index is not a hole
+ */
+export function getHoleCentre(holeIndex) {
+  /* Strict about the index: an array happily answers to "0" as well as 0, and
+     a position on the board should only ever be a whole number. */
+  if (!elements || !Number.isInteger(holeIndex)) {
+    return null;
+  }
+
+  const hole = elements.holes[holeIndex];
+  if (!hole) {
+    return null;
+  }
+
+  const bounds = hole.getBoundingClientRect();
+  return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+}
+
+/**
+ * Reports which hole a viewport point is over, or -1. Used to follow the
+ * pointer; it never reports a hit.
+ */
+export function findHoleAtPoint(viewportX, viewportY) {
+  if (!elements) {
+    return -1;
+  }
+
+  return elements.holes.findIndex((hole) => {
+    if (hole.disabled) {
+      return false;
+    }
+
+    const bounds = hole.getBoundingClientRect();
+    return (
+      viewportX >= bounds.left &&
+      viewportX <= bounds.right &&
+      viewportY >= bounds.top &&
+      viewportY <= bounds.bottom
+    );
+  });
+}
+
+export function onBoardPointerMove(handler) {
+  if (!elements || boardPointerMoveListener) {
+    return;
+  }
+
+  boardPointerMoveListener = handler;
+  elements.board.addEventListener("pointermove", boardPointerMoveListener);
+}
+
+export function offBoardPointerMove() {
+  if (!elements || !boardPointerMoveListener) {
+    return;
+  }
+
+  elements.board.removeEventListener("pointermove", boardPointerMoveListener);
+  boardPointerMoveListener = null;
+}
+
+export function onBoardPointerLeave(handler) {
+  if (!elements || boardPointerLeaveListener) {
+    return;
+  }
+
+  boardPointerLeaveListener = handler;
+  elements.board.addEventListener("pointerleave", boardPointerLeaveListener);
+}
+
+export function offBoardPointerLeave() {
+  if (!elements || !boardPointerLeaveListener) {
+    return;
+  }
+
+  elements.board.removeEventListener("pointerleave", boardPointerLeaveListener);
+  boardPointerLeaveListener = null;
 }
 
 /**
