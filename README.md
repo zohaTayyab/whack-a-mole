@@ -7,13 +7,14 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 6 (hit detection and scoring) is complete. Selecting Start Game makes moles appear in random holes, one
-at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard adds one point. Each mole
-counts at most once.
+Milestone 7 (timer and game lifecycle) is complete. A round lasts 60 seconds. Moles appear in random holes, one
+at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard adds one point; each mole
+counts at most once. Restart Game begins a fresh round at any point, and when the countdown reaches zero the
+round ends and reports the final score. Backgrounding the page pauses the round and returns to it with the same
+remaining time.
 
-The countdown, restart, the game-over state, best-score persistence, difficulty behaviour, and sound are not
-implemented yet; they arrive in Milestones 7 and 8. Time Remaining and Best Score currently show fixed values,
-and the Difficulty and Sound controls have no effect on play.
+Best-score persistence, difficulty behaviour, and sound are not implemented yet; they arrive in Milestone 8. Best
+Score currently shows a fixed value, and the Difficulty and Sound controls have no effect on play.
 
 ## Project structure
 
@@ -25,7 +26,8 @@ scripts/main.js            application entry point     (complete)
 scripts/ui.js              interface and rendering     (complete)
 scripts/config.js          mole-cycle configuration    (complete)
 scripts/mole-cycle.js      mole appearance scheduling  (complete)
-scripts/game-controller.js input handling and scoring  (complete)
+scripts/round-timer.js     round countdown             (complete)
+scripts/game-controller.js round lifecycle and scoring (complete)
 ```
 
 ## Running locally
@@ -47,7 +49,7 @@ Then visit <http://localhost:8000>.
 - [x] **Milestone 4 — Minimal JavaScript initialization.** ES module entry point wired to the DOM.
 - [x] **Milestone 5 — Random mole appearance.** Game state and randomised mole timing.
 - [x] **Milestone 6 — Hit detection and scoring.** Mouse, touch, and keyboard input; score tracking.
-- [ ] **Milestone 7 — Timer and game lifecycle.** Start, countdown, end, and reset.
+- [x] **Milestone 7 — Timer and game lifecycle.** Start, countdown, end, and reset.
 - [ ] **Milestone 8 — Best score, difficulty, and sound.** Persistence, difficulty ramp, audio feedback.
 - [ ] **Milestone 9 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
 - [ ] **Milestone 10 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.

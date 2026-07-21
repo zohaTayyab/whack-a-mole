@@ -12,6 +12,12 @@ import {
 const NO_PREVIOUS_HOLE = -1;
 const NO_ACTIVE_MOLE = -1;
 
+const CycleState = {
+  Stopped: "stopped",
+  Running: "running",
+  Paused: "paused",
+};
+
 function randomWholeNumberBetween(minimum, maximum) {
   return minimum + Math.floor(Math.random() * (maximum - minimum + 1));
 }
@@ -20,12 +26,13 @@ function randomWholeNumberBetween(minimum, maximum) {
  * Creates a mole cycle that shows one mole at a time.
  *
  * @param {{showMole: (index: number) => void, hideMole: () => void}} renderer
- * @returns {{start: () => void, stop: () => void, isRunning: () => boolean,
+ * @returns {{start: () => void, stop: () => void, pause: () => void,
+ *   resume: () => void, isRunning: () => boolean,
  *   attemptHit: (holeIndex: number) => boolean}}
  */
 export function createMoleCycle({ showMole, hideMole }) {
   let scheduledTimeoutId = null;
-  let isCycleRunning = false;
+  let cycleState = CycleState.Stopped;
   let previousHoleIndex = NO_PREVIOUS_HOLE;
   /* The hole a mole currently occupies and has not yet been hit in. Cleared as
      soon as the appearance ends, which is what makes an appearance scoreable at
@@ -78,11 +85,11 @@ export function createMoleCycle({ showMole, hideMole }) {
   return {
     /** Starts the cycle. Calling this while it runs has no effect. */
     start() {
-      if (isCycleRunning) {
+      if (cycleState !== CycleState.Stopped) {
         return;
       }
 
-      isCycleRunning = true;
+      cycleState = CycleState.Running;
       showNextMole();
     },
 
@@ -95,7 +102,7 @@ export function createMoleCycle({ showMole, hideMole }) {
      */
     attemptHit(holeIndex) {
       if (
-        !isCycleRunning ||
+        cycleState !== CycleState.Running ||
         activeHoleIndex === NO_ACTIVE_MOLE ||
         holeIndex !== activeHoleIndex
       ) {
@@ -112,9 +119,35 @@ export function createMoleCycle({ showMole, hideMole }) {
       return true;
     },
 
+    /**
+     * Suspends the cycle without ending it. The board is cleared and the
+     * current appearance is retired, so nothing can be hit until it resumes.
+     * The previous hole is kept so repeat prevention survives the pause.
+     */
+    pause() {
+      if (cycleState !== CycleState.Running) {
+        return;
+      }
+
+      cycleState = CycleState.Paused;
+      cancelScheduledWork();
+      activeHoleIndex = NO_ACTIVE_MOLE;
+      hideMole();
+    },
+
+    /** Continues a paused cycle with exactly one new appearance. */
+    resume() {
+      if (cycleState !== CycleState.Paused) {
+        return;
+      }
+
+      cycleState = CycleState.Running;
+      showNextMole();
+    },
+
     /** Stops the cycle, cancels pending work, and clears the visible mole. */
     stop() {
-      isCycleRunning = false;
+      cycleState = CycleState.Stopped;
       cancelScheduledWork();
       hideMole();
       previousHoleIndex = NO_PREVIOUS_HOLE;
@@ -122,7 +155,7 @@ export function createMoleCycle({ showMole, hideMole }) {
     },
 
     isRunning() {
-      return isCycleRunning;
+      return cycleState === CycleState.Running;
     },
   };
 }

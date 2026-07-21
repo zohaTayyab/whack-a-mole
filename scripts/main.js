@@ -3,11 +3,13 @@
 
 import { hideMoles, initializeInterface, showMoleAt } from "./ui.js";
 import { createMoleCycle } from "./mole-cycle.js";
+import { createRoundTimer } from "./round-timer.js";
 import { createGameController } from "./game-controller.js";
 
 if (initializeInterface()) {
   const moleCycle = createMoleCycle({ showMole: showMoleAt, hideMole: hideMoles });
-  const gameController = createGameController({ moleCycle });
+  const roundTimer = createRoundTimer();
+  const gameController = createGameController({ moleCycle, roundTimer });
 
   gameController.connect();
 

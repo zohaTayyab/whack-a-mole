@@ -27,6 +27,8 @@ const MOLE_VISIBLE_NAME_SUFFIX = ", mole visible";
 let elements = null;
 let holeActivationListener = null;
 let startGameListener = null;
+let restartGameListener = null;
+let visibilityListener = null;
 
 /**
  * Resolves every required element once so later work never re-queries the DOM.
@@ -78,13 +80,7 @@ function findElements() {
  * authored values.
  */
 function applyInitialState() {
-  elements.startGame.disabled = false;
-  elements.restartGame.disabled = true;
-
-  for (const hole of elements.holes) {
-    hole.disabled = true;
-  }
-
+  applyControls({ startEnabled: true, restartEnabled: false, holesEnabled: false });
   hideMoles();
   setStatusMessage(READY_MESSAGE);
 }
@@ -149,14 +145,20 @@ export function hideMoles() {
   });
 }
 
-/** Enables or disables all nine mole-hole buttons together. */
-export function setHolesEnabled(isEnabled) {
+/**
+ * Applies the controls for one lifecycle state in a single step, so no state
+ * can leave a stale combination of enabled and disabled controls behind.
+ */
+export function applyControls({ startEnabled, restartEnabled, holesEnabled }) {
   if (!elements) {
     return;
   }
 
+  elements.startGame.disabled = !startEnabled;
+  elements.restartGame.disabled = !restartEnabled;
+
   for (const hole of elements.holes) {
-    hole.disabled = !isEnabled;
+    hole.disabled = !holesEnabled;
   }
 }
 
@@ -209,6 +211,16 @@ export function setScore(score) {
   elements.score.textContent = String(score);
 }
 
+/* Time Remaining is deliberately not a live region: announcing every second
+   would talk over everything else. */
+export function setTimeRemaining(seconds) {
+  if (!elements) {
+    return;
+  }
+
+  elements.timeRemaining.textContent = String(seconds);
+}
+
 /* Game Status is a live region, so an unchanged message is left alone to avoid
    announcing it again. */
 export function setStatusMessage(message) {
@@ -219,14 +231,6 @@ export function setStatusMessage(message) {
   if (elements.gameStatus.textContent.trim() !== message) {
     elements.gameStatus.textContent = message;
   }
-}
-
-export function setStartGameEnabled(isEnabled) {
-  if (!elements) {
-    return;
-  }
-
-  elements.startGame.disabled = !isEnabled;
 }
 
 export function onStartGame(handler) {
@@ -245,4 +249,47 @@ export function offStartGame() {
 
   elements.startGame.removeEventListener("click", startGameListener);
   startGameListener = null;
+}
+
+export function onRestartGame(handler) {
+  if (!elements || restartGameListener) {
+    return;
+  }
+
+  restartGameListener = handler;
+  elements.restartGame.addEventListener("click", restartGameListener);
+}
+
+export function offRestartGame() {
+  if (!elements || !restartGameListener) {
+    return;
+  }
+
+  elements.restartGame.removeEventListener("click", restartGameListener);
+  restartGameListener = null;
+}
+
+/**
+ * Registers a document-visibility handler when the browser supports the Page
+ * Visibility API. Where it is unavailable nothing is registered and the round
+ * simply continues, which is the safe outcome.
+ *
+ * @param {(isHidden: boolean) => void} handler
+ */
+export function onDocumentVisibilityChange(handler) {
+  if (visibilityListener || typeof document.hidden !== "boolean") {
+    return;
+  }
+
+  visibilityListener = () => handler(document.hidden);
+  document.addEventListener("visibilitychange", visibilityListener);
+}
+
+export function offDocumentVisibilityChange() {
+  if (!visibilityListener) {
+    return;
+  }
+
+  document.removeEventListener("visibilitychange", visibilityListener);
+  visibilityListener = null;
 }

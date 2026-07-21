@@ -1,6 +1,9 @@
-/* Named configuration values for the mole appearance cycle. */
+/* Named configuration values for the mole appearance cycle and the round. */
 
 export const HOLE_COUNT = 9;
+
+/* Length of one round, matching the value the interface starts from. */
+export const ROUND_DURATION_SECONDS = 60;
 
 /* How long a mole stays visible, in milliseconds. */
 export const MOLE_VISIBLE_MIN_MS = 650;
