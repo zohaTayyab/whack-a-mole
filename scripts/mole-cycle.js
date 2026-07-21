@@ -1,16 +1,12 @@
 /* Schedules which hole shows a mole and for how long. This module holds no DOM
    references: the caller supplies how to show and hide a mole. */
 
-import {
-  HOLE_COUNT,
-  MOLE_VISIBLE_MIN_MS,
-  MOLE_VISIBLE_MAX_MS,
-  MOLE_GAP_MIN_MS,
-  MOLE_GAP_MAX_MS,
-} from "./config.js";
+import { DEFAULT_DIFFICULTY, HOLE_COUNT, difficultyProfile } from "./config.js";
 
 const NO_PREVIOUS_HOLE = -1;
 const NO_ACTIVE_MOLE = -1;
+
+const DEFAULT_TIMING = difficultyProfile(DEFAULT_DIFFICULTY);
 
 const CycleState = {
   Stopped: "stopped",
@@ -20,6 +16,25 @@ const CycleState = {
 
 function randomWholeNumberBetween(minimum, maximum) {
   return minimum + Math.floor(Math.random() * (maximum - minimum + 1));
+}
+
+function isPositiveDuration(value) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+/* A profile arriving from outside is only trusted once every duration is a
+   usable number and neither range is inverted. */
+function isUsableTiming(timing) {
+  return (
+    timing !== null &&
+    typeof timing === "object" &&
+    isPositiveDuration(timing.visibleMinMs) &&
+    isPositiveDuration(timing.visibleMaxMs) &&
+    isPositiveDuration(timing.gapMinMs) &&
+    isPositiveDuration(timing.gapMaxMs) &&
+    timing.visibleMinMs <= timing.visibleMaxMs &&
+    timing.gapMinMs <= timing.gapMaxMs
+  );
 }
 
 /**
@@ -33,6 +48,7 @@ function randomWholeNumberBetween(minimum, maximum) {
 export function createMoleCycle({ showMole, hideMole }) {
   let scheduledTimeoutId = null;
   let cycleState = CycleState.Stopped;
+  let timing = DEFAULT_TIMING;
   let previousHoleIndex = NO_PREVIOUS_HOLE;
   /* The hole a mole currently occupies and has not yet been hit in. Cleared as
      soon as the appearance ends, which is what makes an appearance scoreable at
@@ -58,14 +74,14 @@ export function createMoleCycle({ showMole, hideMole }) {
 
     scheduledTimeoutId = setTimeout(
       hideCurrentMole,
-      randomWholeNumberBetween(MOLE_VISIBLE_MIN_MS, MOLE_VISIBLE_MAX_MS)
+      randomWholeNumberBetween(timing.visibleMinMs, timing.visibleMaxMs)
     );
   }
 
   function scheduleNextAppearance() {
     scheduledTimeoutId = setTimeout(
       showNextMole,
-      randomWholeNumberBetween(MOLE_GAP_MIN_MS, MOLE_GAP_MAX_MS)
+      randomWholeNumberBetween(timing.gapMinMs, timing.gapMaxMs)
     );
   }
 
@@ -83,6 +99,32 @@ export function createMoleCycle({ showMole, hideMole }) {
   }
 
   return {
+    /**
+     * Sets the timing for the appearances that follow. The values are copied,
+     * so a caller that later edits its own profile cannot change a round in
+     * progress, and an unusable profile leaves the default timing in place
+     * rather than producing a board that never changes. Timing is fixed while
+     * the cycle runs, so a round always finishes under the timing it began
+     * with.
+     *
+     * @param {{visibleMinMs: number, visibleMaxMs: number, gapMinMs: number,
+     *   gapMaxMs: number}} profile
+     */
+    configure(profile) {
+      if (cycleState !== CycleState.Stopped) {
+        return;
+      }
+
+      timing = isUsableTiming(profile)
+        ? Object.freeze({
+            visibleMinMs: profile.visibleMinMs,
+            visibleMaxMs: profile.visibleMaxMs,
+            gapMinMs: profile.gapMinMs,
+            gapMaxMs: profile.gapMaxMs,
+          })
+        : DEFAULT_TIMING;
+    },
+
     /** Starts the cycle. Calling this while it runs has no effect. */
     start() {
       if (cycleState !== CycleState.Stopped) {

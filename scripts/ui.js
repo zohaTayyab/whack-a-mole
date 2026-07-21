@@ -28,6 +28,8 @@ let elements = null;
 let holeActivationListener = null;
 let startGameListener = null;
 let restartGameListener = null;
+let difficultyListener = null;
+let soundListener = null;
 let visibilityListener = null;
 
 /**
@@ -80,7 +82,12 @@ function findElements() {
  * authored values.
  */
 function applyInitialState() {
-  applyControls({ startEnabled: true, restartEnabled: false, holesEnabled: false });
+  applyControls({
+    startEnabled: true,
+    restartEnabled: false,
+    holesEnabled: false,
+    difficultyEnabled: true,
+  });
   hideMoles();
   setStatusMessage(READY_MESSAGE);
 }
@@ -149,13 +156,19 @@ export function hideMoles() {
  * Applies the controls for one lifecycle state in a single step, so no state
  * can leave a stale combination of enabled and disabled controls behind.
  */
-export function applyControls({ startEnabled, restartEnabled, holesEnabled }) {
+export function applyControls({
+  startEnabled,
+  restartEnabled,
+  holesEnabled,
+  difficultyEnabled,
+}) {
   if (!elements) {
     return;
   }
 
   elements.startGame.disabled = !startEnabled;
   elements.restartGame.disabled = !restartEnabled;
+  elements.difficulty.disabled = !difficultyEnabled;
 
   for (const hole of elements.holes) {
     hole.disabled = !holesEnabled;
@@ -209,6 +222,20 @@ export function setScore(score) {
   }
 
   elements.score.textContent = String(score);
+}
+
+/* Best Score carries no aria-live of its own. It is written whenever the
+   selection or the round changes, so an unchanged value is left alone: a
+   needless write would be a needless change for anything watching it. */
+export function setBestScore(score) {
+  if (!elements) {
+    return;
+  }
+
+  const text = String(score);
+  if (elements.bestScore.textContent !== text) {
+    elements.bestScore.textContent = text;
+  }
 }
 
 /* Time Remaining is deliberately not a live region: announcing every second
@@ -267,6 +294,69 @@ export function offRestartGame() {
 
   elements.restartGame.removeEventListener("click", restartGameListener);
   restartGameListener = null;
+}
+
+/** @returns {string} the difficulty currently selected in the interface */
+export function getSelectedDifficulty() {
+  return elements ? elements.difficulty.value : "";
+}
+
+export function onDifficultyChange(handler) {
+  if (!elements || difficultyListener) {
+    return;
+  }
+
+  difficultyListener = handler;
+  elements.difficulty.addEventListener("change", difficultyListener);
+}
+
+export function offDifficultyChange() {
+  if (!elements || !difficultyListener) {
+    return;
+  }
+
+  elements.difficulty.removeEventListener("change", difficultyListener);
+  difficultyListener = null;
+}
+
+/** @returns {boolean} whether the player currently wants sound */
+export function getSoundEnabled() {
+  return elements ? elements.sound.checked : false;
+}
+
+export function onSoundChange(handler) {
+  if (!elements || soundListener) {
+    return;
+  }
+
+  soundListener = handler;
+  elements.sound.addEventListener("change", soundListener);
+}
+
+export function offSoundChange() {
+  if (!elements || !soundListener) {
+    return;
+  }
+
+  elements.sound.removeEventListener("change", soundListener);
+  soundListener = null;
+}
+
+/**
+ * Reflects whether the browser can play sound at all. When it cannot, the
+ * checkbox is cleared as well as disabled, so its state stays truthful rather
+ * than offering sound that will never arrive.
+ */
+export function setSoundAvailable(isAvailable) {
+  if (!elements) {
+    return;
+  }
+
+  if (!isAvailable) {
+    elements.sound.checked = false;
+  }
+
+  elements.sound.disabled = !isAvailable;
 }
 
 /**
