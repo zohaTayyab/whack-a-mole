@@ -38,6 +38,35 @@ function defaultHasFinePointer() {
   };
 }
 
+/* The kind of pointer is not fixed for the life of the page: a tablet gains one
+   when its keyboard is attached and loses it again when it is taken away, and a
+   desktop can have its mouse unplugged. Answering only once would leave those
+   players with a hammer that never appears, or one still chasing a pointer that
+   no longer exists.
+
+   Returns a function that stops watching, or null where the browser gives no
+   way to watch. */
+function defaultOnFinePointerChange() {
+  return (handler) => {
+    try {
+      if (typeof globalThis.matchMedia !== "function") {
+        return null;
+      }
+
+      const query = globalThis.matchMedia(FINE_POINTER_QUERY);
+      if (typeof query.addEventListener !== "function") {
+        return null;
+      }
+
+      const listener = (event) => handler(event.matches === true);
+      query.addEventListener("change", listener);
+      return () => query.removeEventListener("change", listener);
+    } catch (error) {
+      return null;
+    }
+  };
+}
+
 function defaultRequestFrame() {
   return typeof globalThis.requestAnimationFrame === "function"
     ? (callback) => globalThis.requestAnimationFrame(callback)
@@ -53,11 +82,14 @@ function defaultCancelFrame() {
 /**
  * Creates the hammer controller.
  *
- * @param {{hasFinePointer?: () => boolean, requestFrame?: Function,
- *   cancelFrame?: Function, schedule?: Function, cancel?: Function}} [dependencies]
+ * @param {{hasFinePointer?: () => boolean,
+ *   onFinePointerChange?: (handler: (isFine: boolean) => void) => (() => void)|null,
+ *   requestFrame?: Function, cancelFrame?: Function, schedule?: Function,
+ *   cancel?: Function}} [dependencies]
  */
 export function createHammerController({
   hasFinePointer = defaultHasFinePointer(),
+  onFinePointerChange = defaultOnFinePointerChange(),
   requestFrame = defaultRequestFrame(),
   cancelFrame = defaultCancelFrame(),
   schedule = (callback, delayMs) => setTimeout(callback, delayMs),
@@ -74,6 +106,7 @@ export function createHammerController({
   let pendingFrame = null;
   let pendingPoint = null;
   let strikeHandle = null;
+  let stopWatchingPointer = null;
 
   function clearPendingFrame() {
     if (pendingFrame !== null) {
@@ -173,6 +206,27 @@ export function createHammerController({
     }, STRIKE_DURATION_MS);
   }
 
+  /* The pointer listeners exist only while there is a pointer worth following,
+     so gaining or losing one is a matter of registering or releasing them. A
+     hammer left over from a pointer that has gone is put away with them. */
+  function applyPointerKind(isFine) {
+    if (isFine === fine) {
+      return;
+    }
+
+    fine = isFine;
+
+    if (fine) {
+      onBoardPointerMove(handlePointerMove);
+      onBoardPointerLeave(handlePointerLeave);
+      return;
+    }
+
+    offBoardPointerMove();
+    offBoardPointerLeave();
+    hide();
+  }
+
   return {
     connect() {
       if (connected) {
@@ -180,13 +234,9 @@ export function createHammerController({
       }
 
       connected = true;
-      fine = hasFinePointer() === true;
       hide();
-
-      if (fine) {
-        onBoardPointerMove(handlePointerMove);
-        onBoardPointerLeave(handlePointerLeave);
-      }
+      applyPointerKind(hasFinePointer() === true);
+      stopWatchingPointer = onFinePointerChange(applyPointerKind);
     },
 
     /** Called when a round starts or resumes. */
@@ -231,8 +281,15 @@ export function createHammerController({
 
       connected = false;
       active = false;
-      offBoardPointerMove();
-      offBoardPointerLeave();
+
+      if (stopWatchingPointer !== null) {
+        stopWatchingPointer();
+        stopWatchingPointer = null;
+      }
+
+      /* Releases the pointer listeners if any were registered; hiding is
+         unconditional, because the hammer may be mid-strike. */
+      applyPointerKind(false);
       hide();
     },
   };

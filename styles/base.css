@@ -81,7 +81,9 @@ h1,
 h2,
 p,
 ul,
-ol {
+ol,
+dl,
+dd {
   margin: 0;
 }
 

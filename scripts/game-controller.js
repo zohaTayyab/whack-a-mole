@@ -127,6 +127,16 @@ export function createGameController({
     }
   }
 
+  /* A browser can offer everything audio needs and still refuse the moment it
+     is asked: the constructor exists, and creating a context throws. That is
+     only discoverable by trying, so availability is reflected again after each
+     point where the audio has had the chance to find out. Without this the
+     Sound checkbox would sit enabled and ticked while nothing could ever be
+     heard, which is the one thing it is meant not to do. */
+  function reflectSoundAvailability() {
+    optional(() => setSoundAvailable(audio.isSupported()));
+  }
+
   /* The reading equivalent: a settings store that cannot answer should leave
      the game at its documented default rather than stop it. */
   function preferredMusicVolume() {
@@ -166,6 +176,7 @@ export function createGameController({
       audio.playRoundStart();
       audio.startRoundMusic();
     });
+    reflectSoundAvailability();
 
     activeDifficulty = difficulty;
     moleCycle.configure(difficultyProfile(activeDifficulty));
@@ -283,6 +294,7 @@ export function createGameController({
         audio.startRoundMusic();
       }
     });
+    reflectSoundAvailability();
   }
 
   /* Visibility is the only reason a round pauses, so a paused round is always
@@ -319,10 +331,8 @@ export function createGameController({
       /* The controller owns the lifecycle, so it asserts the controls for the
          state it is in rather than assuming the markup already matches. */
       applyControls(CONTROLS_BY_STATE[state]);
-      optional(() => {
-        setSoundAvailable(audio.isSupported());
-        audio.setEnabled(getSoundEnabled());
-      });
+      reflectSoundAvailability();
+      optional(() => audio.setEnabled(getSoundEnabled()));
 
       /* The stored volume is shown and handed to the audio before any context
          exists, so it is already in force the first time music plays. */

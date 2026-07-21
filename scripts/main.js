@@ -36,8 +36,19 @@ if (initializeInterface()) {
   gameController.connect();
 
   /* Release the listeners, the pending timeout, and the audio resources when
-     the page goes away. */
-  window.addEventListener("pagehide", () => {
+     the page goes away.
+
+     Only when it is really going away, though: a persisted event means the
+     browser is freezing the page for its back/forward cache and may restore it
+     exactly as it stands, so tearing the game down here would bring the player
+     back to a board that no longer responds. A frozen page runs nothing of its
+     own, and an evicted one is discarded whole, so there is nothing left to
+     release in that case. */
+  window.addEventListener("pagehide", (event) => {
+    if (event.persisted) {
+      return;
+    }
+
     gameController.disconnect();
     themeController.disconnect();
   });

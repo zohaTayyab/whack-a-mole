@@ -7,13 +7,14 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 9 (theme, hammer, and volume) is complete. A round lasts 60 seconds at every difficulty. Moles appear
-in random holes, one at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard adds
-one point; each mole counts at most once. Restart Game begins a fresh round at any point, and when the countdown
-reaches zero the round ends and reports the final score. Backgrounding the page pauses the round and returns to
-it with the same remaining time.
+Milestone 10 (accessibility and edge cases) is complete. A round lasts 60 seconds at every difficulty. Moles
+appear in random holes, one at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard
+adds one point; each mole counts at most once. Restart Game begins a fresh round at any point, and when the
+countdown reaches zero the round ends and reports the final score. Backgrounding the page pauses the round and
+returns to it with the same remaining time, and leaving the page and returning with the browser's Back button
+restores it ready to play.
 
-A broader accessibility review is Milestone 10 and has not been carried out yet.
+Cross-browser checks and deployment are Milestone 11 and have not been carried out yet.
 
 ## Features
 
@@ -45,6 +46,32 @@ A broader accessibility review is Milestone 10 and has not been carried out yet.
 - **Stored settings.** The theme and the music volume are kept under their own storage key, separate from best
   scores. Missing, malformed, or unavailable storage falls back to documented defaults without interrupting play.
 
+## Accessibility
+
+- **One announcement region.** Game Status is the only live region on the page, so starting, pausing, resuming,
+  hitting a mole, and game over are announced, and nothing else is. The score, the countdown, and the best score
+  are a description list of readings rather than form output, so they can be consulted at any time without the
+  countdown interrupting every second.
+- **Native controls.** Every control is the element the browser already understands: buttons for the holes and
+  the actions, a select for difficulty, checkboxes for sound and theme, and a range for volume. Each has an
+  associated label, its own keyboard behaviour, and a disabled state that matches the point the round has reached.
+  No accessibility attribute stands in for a native element.
+- **Keyboard.** Tab reaches every enabled control in document order. Enter and Space activate buttons and toggle
+  checkboxes, and the volume slider answers to the arrow keys, Home, and End. Nothing takes focus on its own, and
+  there is no point at which focus cannot be moved onward.
+- **Visible focus.** Keyboard navigation draws a three-pixel focus ring, offset clear of the control, in both
+  themes. The hammer is drawn within the hole it strikes and does not cover that ring.
+- **Touch targets.** Interactive targets are at least 44 by 44 CSS pixels. Each checkbox sits inside its own
+  label, so the whole row is one target rather than the small box alone.
+- **Never colour alone.** A mole is distinguished by shape and size as well as by fill, and every state the game
+  reports is also written out in words.
+- **Reduced motion.** Where reduced motion is preferred, transitions collapse to nothing and the hammer's swing
+  becomes a still strike, so the feedback survives without the movement.
+- **Decoration stays decoration.** The hammer is hidden from assistive technology, takes no pointer events, is
+  not in the tab order, and can neither change a hole's name nor affect the score.
+
+Testing is described under [Testing](#testing) below, including which checks could not be carried out.
+
 ## Project structure
 
 ```
@@ -75,6 +102,32 @@ python3 -m http.server 8000
 
 Then visit <http://localhost:8000>.
 
+## Testing
+
+The game has no build step and no test framework. It is verified in two ways: module-level checks run against the
+source with dependencies supplied by the test, and behavioural checks driven against a real browser.
+
+Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
+
+- Page structure, accessible names, and the accessibility tree, including which regions announce changes.
+- Keyboard operation with Tab, Enter, Space, the arrow keys, Home, and End.
+- Mouse activation, and touch activation through the browser's touch emulation.
+- Layout at 320, 375, 768, 1280, and 1440 CSS pixels wide, in portrait and landscape, and at 200% zoom.
+- Colour contrast in both themes, measured against the colours the browser actually resolves.
+- Reduced-motion behaviour.
+- Round lifecycle, scoring, timing, difficulty, persistence, audio, themes, volume, and the hammer.
+- Behaviour when storage is denied or holds corrupt data, and when the browser refuses to create audio.
+
+Not carried out:
+
+- Screen-reader testing with an actual screen reader.
+- Safari, Firefox, and Edge, and any browser on Windows, Linux, iOS, or Android.
+- Any physical mobile or tablet device. Viewport emulation is not a substitute for one.
+- Selecting a difficulty with the arrow keys, Home, or End. The control is a native select and the page does not
+  intercept those keys, but headless Chrome provides no native select menu to act on them.
+
+Cross-browser and device testing belongs to Milestone 11.
+
 ## Roadmap
 
 - [x] **Milestone 1 — Documentation and roadmap.** Project README, incremental workflow rules, repository setup.
@@ -87,7 +140,7 @@ Then visit <http://localhost:8000>.
 - [x] **Milestone 8 — Best score, difficulty, and sound.** Persistence, difficulty ramp, audio feedback.
 - [x] **Milestone 9 — Theme, hammer, and volume.** Light and dark themes, a hammer cursor and strike, and a
       background-music volume control.
-- [ ] **Milestone 10 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
+- [x] **Milestone 10 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
 - [ ] **Milestone 11 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.
 
 Milestones are implemented one at a time, each leaving the application in a working state.

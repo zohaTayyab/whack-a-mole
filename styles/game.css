@@ -90,11 +90,10 @@
 
 /* Scoreboard */
 
-.scoreboard__list {
-  padding: 0;
-  list-style: none;
-}
-
+/* A row per reading, holding the term and its value. Both are allowed to wrap
+   onto separate lines rather than being pinned to columns, which is what keeps
+   the panel readable when the viewport is very narrow or the page is zoomed
+   well past 200%. */
 .scoreboard__item {
   display: flex;
   flex-wrap: wrap;
@@ -150,10 +149,13 @@
   color: var(--color-text-muted);
 }
 
-/* Enlarges the click target to meet the minimum without changing label styling. */
+/* The label holds the checkbox, so this box is the whole target: it reaches
+   the minimum height the control itself does not, and the band above and
+   below the box counts as part of it. */
 .field__label--checkbox {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-2xs);
   min-height: var(--target-min);
   padding-inline-end: var(--space-2xs);
 }
