@@ -8,12 +8,17 @@ announcing them would interrupt the player every second.
 NAME = "structure"
 DESCRIPTION = "semantic markup, accessible names, and live regions"
 
+# In document order, which is also the order Tab visits them: the title
+# screen, then the board, then the settings, then game over.
 EXPECTED_NAMES = [
-    "Difficulty", "Sound", "Music Volume", "Dark theme",
-    "Start Game", "Restart Game",
+    "Start Game",
     "Hole 1", "Hole 2", "Hole 3", "Hole 4", "Hole 5",
     "Hole 6", "Hole 7", "Hole 8", "Hole 9",
+    "Difficulty", "Sound", "Music Volume", "Dark theme",
+    "Restart Game",
 ]
+
+SCREENS = ["screen-title", "screen-game", "screen-settings", "screen-over"]
 
 
 def run(browser, url, results):
@@ -29,6 +34,37 @@ def run(browser, url, results):
     results.check("nine holes", browser.eval("document.querySelectorAll('.hole').length"), 9)
 
     results.check("one h1", browser.eval("document.querySelectorAll('h1').length"), 1)
+
+    # Four screens, each a section carrying its own heading, so the game reads
+    # as four places rather than one page.
+    results.check("four screens, in order",
+                  browser.eval("[...document.querySelectorAll('.stage > .screen')]"
+                               ".map(screen => screen.id)"), SCREENS)
+    results.check(
+        "every screen is a section named by its own heading",
+        browser.eval("""
+          [...document.querySelectorAll('.stage > .screen')].every(screen => {
+            if (screen.tagName !== 'SECTION') { return false; }
+            const heading = document.getElementById(
+              screen.getAttribute('aria-labelledby'));
+            return Boolean(heading) && heading.tagName === 'H2'
+              && heading.parentElement === screen
+              && heading.textContent.trim().length > 0;
+          })
+        """),
+        True,
+    )
+    results.check(
+        "the screens name themselves",
+        browser.eval("[...document.querySelectorAll('.stage > .screen')]"
+                     ".map(screen => document.getElementById("
+                     "screen.getAttribute('aria-labelledby')).textContent.trim())"),
+        ["Start a Round", "Game Board", "Game Settings", "Game Over"],
+    )
+    results.check(
+        "no screen is nested inside another",
+        browser.eval("document.querySelectorAll('.screen .screen').length"), 0,
+    )
     results.check(
         "every section is titled",
         browser.eval("""

@@ -1,7 +1,7 @@
 /* Layout and presentation for the Whack-a-Mole interface. */
 
 .page-header,
-.layout,
+.stage,
 .page-footer {
   width: min(100% - (2 * var(--space-sm)), 64rem);
   margin-inline: auto;
@@ -19,55 +19,61 @@
   letter-spacing: -0.015em;
 }
 
+/* Measured rather than full width, so a line stays comfortable to read. It is
+   no longer centred: it now sits in a screen whose heading is aligned to the
+   start, and centring it there would leave the two visibly out of line. */
 .page-intro {
   max-width: 52ch;
-  margin-inline: auto;
   margin-block-start: var(--space-xs);
   color: var(--color-text-muted);
   font-size: var(--text-lg);
 }
 
-/* Layout: a single column that becomes a control sidebar beside the board. */
-
 /* The stage holds the header and the footer in place and gives the rest of the
    height to this row, so anything that does not fit scrolls here rather than
    moving the whole page. Containing the overscroll stops a swipe that reaches
    the end from being handed to the browser, which is what produces the rubber
-   banding and pull-to-refresh that interrupt a round.
-
-   The panels are still one long column at this point; the screens that will
-   replace it arrive in the next step. */
-.layout {
+   banding and pull-to-refresh that interrupt a round. */
+.stage {
   display: grid;
   gap: var(--space-md);
+  align-content: start;
   padding-block-end: var(--space-lg);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-/* Explicit areas keep the board beside the controls rather than below them. */
+/* One screen: a column of its own panels. Every screen is shown at once until
+   the controller that shows one at a time arrives, so each is separated
+   clearly enough to be read as its own place. */
+.screen {
+  display: grid;
+  gap: var(--space-sm);
+  align-content: start;
+}
+
+.screen__title {
+  font-size: var(--text-xl);
+}
+
+/* The board screen puts the readings beside the board once there is room for
+   two columns, rather than stacking them above it. */
 @media (min-width: 60rem) {
-  .layout {
+  .screen--game {
     grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
     grid-template-areas:
+      "heading    board"
       "scoreboard board"
-      "settings   board"
-      "controls   board"
-      "status     board"
-      "instructions instructions";
+      "status     board";
     align-items: start;
+  }
+
+  .screen--game > .screen__title {
+    grid-area: heading;
   }
 
   .scoreboard {
     grid-area: scoreboard;
-  }
-
-  .settings {
-    grid-area: settings;
-  }
-
-  .controls {
-    grid-area: controls;
   }
 
   .status {
@@ -76,10 +82,6 @@
 
   .board-panel {
     grid-area: board;
-  }
-
-  .instructions {
-    grid-area: instructions;
   }
 }
 

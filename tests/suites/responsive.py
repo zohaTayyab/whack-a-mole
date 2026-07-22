@@ -49,7 +49,7 @@ def run(browser, url, results):
         stage = browser.eval("""
           (() => {
             const doc = document.documentElement;
-            const layout = document.querySelector('.layout');
+            const layout = document.querySelector('.stage');
             return {
               stageHeight: Math.round(document.body.getBoundingClientRect().height),
               viewport: doc.clientHeight,
