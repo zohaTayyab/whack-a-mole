@@ -42,6 +42,30 @@ def run(browser, url, results):
         """)
         results.ok("{}: the page does not scroll sideways".format(label),
                    overflow["scrollWidth"] <= overflow["clientWidth"] + 1)
+
+        # The stage is one screen tall and the document itself never scrolls;
+        # anything that does not fit scrolls inside the layout instead, so a
+        # round is never interrupted by the page moving under the player.
+        stage = browser.eval("""
+          (() => {
+            const doc = document.documentElement;
+            const layout = document.querySelector('.layout');
+            return {
+              stageHeight: Math.round(document.body.getBoundingClientRect().height),
+              viewport: doc.clientHeight,
+              documentScrolls: doc.scrollHeight > doc.clientHeight + 1,
+              everythingReachable:
+                layout.scrollHeight <= layout.clientHeight + 1 ||
+                getComputedStyle(layout).overflowY === 'auto',
+            };
+          })()
+        """)
+        results.ok("{}: the stage fills exactly one screen".format(label),
+                   abs(stage["stageHeight"] - stage["viewport"]) <= 1)
+        results.check("{}: the document does not scroll".format(label),
+                      stage["documentScrolls"], False)
+        results.check("{}: nothing is left unreachable".format(label),
+                      stage["everythingReachable"], True)
         results.ok("{}: nothing reaches past the viewport".format(label),
                    overflow["widest"] <= overflow["clientWidth"] + 1)
 

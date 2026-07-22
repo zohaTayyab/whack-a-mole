@@ -29,10 +29,20 @@
 
 /* Layout: a single column that becomes a control sidebar beside the board. */
 
+/* The stage holds the header and the footer in place and gives the rest of the
+   height to this row, so anything that does not fit scrolls here rather than
+   moving the whole page. Containing the overscroll stops a swipe that reaches
+   the end from being handed to the browser, which is what produces the rubber
+   banding and pull-to-refresh that interrupt a round.
+
+   The panels are still one long column at this point; the screens that will
+   replace it arrive in the next step. */
 .layout {
   display: grid;
   gap: var(--space-md);
   padding-block-end: var(--space-lg);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* Explicit areas keep the board beside the controls rather than below them. */
