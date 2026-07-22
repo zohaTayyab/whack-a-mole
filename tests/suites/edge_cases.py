@@ -73,7 +73,8 @@ def run(browser, url, results):
     after_start_spam = game.control_state(browser)
     results.check("ten clicks on Start Game still leaves one round",
                   after_start_spam["holesEnabled"], 9)
-    results.check("and the full round length", after_start_spam["time"], 60)
+    results.ok("and one round's worth of time, not several",
+               30 <= after_start_spam["time"] <= 60)
 
     for _ in range(10):
         browser.eval("document.querySelector('#restart-game').click()")
@@ -100,6 +101,10 @@ def run(browser, url, results):
     # off per real second; anything that gave time back, or ran away with it,
     # shows up here. Sampled several times because a single pair of readings
     # cannot tell a steady countdown from a stuttering one.
+    # Restarted first, so there is a full round left to sample: the clicking
+    # above runs the ten-times clock through a good part of one.
+    browser.eval("document.querySelector('#restart-game').click()")
+    time.sleep(0.3)
     samples = []
     for _ in range(6):
         samples.append(game.control_state(browser)["time"])

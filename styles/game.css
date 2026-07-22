@@ -52,6 +52,14 @@
   align-content: start;
 }
 
+/* Setting display on the screen overrides the display: none the browser gives
+   the hidden attribute, which would leave a hidden screen invisible but still
+   focusable. Restoring it here is what actually takes a screen out of the tab
+   order. */
+.screen[hidden] {
+  display: none;
+}
+
 .screen__title {
   font-size: var(--text-xl);
 }

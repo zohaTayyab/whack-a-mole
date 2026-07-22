@@ -9,6 +9,7 @@ import {
   difficultyProfile,
   resolveDifficulty,
 } from "./config.js";
+import { Screen } from "./screen-controller.js";
 import {
   applyControls,
   getMusicVolume,
@@ -17,6 +18,7 @@ import {
   offDifficultyChange,
   offDocumentVisibilityChange,
   offHoleActivate,
+  offMainMenu,
   offMusicVolumeChange,
   offRestartGame,
   offSoundChange,
@@ -24,6 +26,7 @@ import {
   onDifficultyChange,
   onDocumentVisibilityChange,
   onHoleActivate,
+  onMainMenu,
   onMusicVolumeChange,
   onRestartGame,
   onSoundChange,
@@ -69,6 +72,18 @@ const CONTROLS_BY_STATE = {
   },
 };
 
+/* Where the game has got to decides which screen is shown, so the round never
+   has to announce a screen change separately from the state change that caused
+   it. A disposed game is left where it is: the page is going away, and moving
+   the player somewhere else on the way out would only be visible as a flicker. */
+const SCREEN_BY_STATE = {
+  [RoundState.Ready]: Screen.Title,
+  [RoundState.Running]: Screen.Game,
+  [RoundState.Paused]: Screen.Game,
+  [RoundState.Finished]: Screen.Over,
+};
+
+const READY_MESSAGE = "Ready to start.";
 const IN_PROGRESS_MESSAGE = "Hit each mole before it disappears.";
 const PAUSED_MESSAGE = "Game paused.";
 const RESUMED_MESSAGE = "Game resumed.";
@@ -86,7 +101,8 @@ function gameOverMessage(score, isNewRecord) {
  * Creates the game controller.
  *
  * @param {{moleCycle: Object, roundTimer: Object, bestScoreStore: Object,
- *   audio: Object, preferences: Object, hammer: Object}} parts
+ *   audio: Object, preferences: Object, hammer: Object,
+ *   screens?: {show: (screen: string) => void}}} parts
  * @returns {{connect: () => void, disconnect: () => void}}
  */
 export function createGameController({
@@ -96,6 +112,9 @@ export function createGameController({
   audio,
   preferences,
   hammer,
+  /* Inert by default: the screens are presentation, so a game without them
+     still starts, scores, and finishes exactly the same way. */
+  screens = { show() {} },
 }) {
   let state = RoundState.Ready;
   let score = STARTING_SCORE;
@@ -112,6 +131,11 @@ export function createGameController({
   function enterState(nextState) {
     state = nextState;
     applyControls(CONTROLS_BY_STATE[nextState]);
+
+    const screen = SCREEN_BY_STATE[nextState];
+    if (screen) {
+      screens.show(screen);
+    }
   }
 
   /* Sound, the hammer, and stored settings are comforts rather than the game:
@@ -244,6 +268,28 @@ export function createGameController({
     );
   }
 
+  /* Leaving a finished round returns the game to the state it opens in, so the
+     title screen offers a round that can actually be started. A round still in
+     progress is left alone: this control belongs to game over, and abandoning
+     a live round is what Restart Game is for. */
+  function handleMainMenu() {
+    if (state !== RoundState.Finished) {
+      return;
+    }
+
+    roundTimer.stop();
+    moleCycle.stop();
+    optional(() => hammer.deactivate());
+    optional(() => audio.stopRoundMusic());
+
+    score = STARTING_SCORE;
+    setScore(score);
+    setTimeRemaining(ROUND_DURATION_SECONDS);
+    showBestScoreFor(resolveDifficulty(getSelectedDifficulty()));
+    enterState(RoundState.Ready);
+    setStatusMessage(READY_MESSAGE);
+  }
+
   function handleHoleActivation(holeIndex) {
     if (state !== RoundState.Running) {
       return;
@@ -345,6 +391,7 @@ export function createGameController({
 
       onStartGame(handleStartGame);
       onRestartGame(handleRestartGame);
+      onMainMenu(handleMainMenu);
       onHoleActivate(handleHoleActivation);
       onDifficultyChange(handleDifficultyChange);
       onSoundChange(handleSoundChange);
@@ -356,6 +403,7 @@ export function createGameController({
     disconnect() {
       offStartGame();
       offRestartGame();
+      offMainMenu();
       offHoleActivate();
       offDifficultyChange();
       offSoundChange();

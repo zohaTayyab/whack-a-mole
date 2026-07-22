@@ -69,6 +69,9 @@ def run(browser, url, results):
         results.ok("{}: nothing reaches past the viewport".format(label),
                    overflow["widest"] <= overflow["clientWidth"] + 1)
 
+        # The board lives on the game screen, so the round has to be started
+        # before there is anything to measure.
+        browser.eval("document.querySelector('#start-game').click()")
         board = browser.eval("""
           (() => {
             const rect = document.querySelector('#board').getBoundingClientRect();

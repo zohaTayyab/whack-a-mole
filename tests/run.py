@@ -29,7 +29,7 @@ from support.expect import Results                      # noqa: E402
 from support.server import StaticServer                 # noqa: E402
 
 BROWSER_SUITES = [
-    "structure", "lifecycle", "scoring", "difficulty",
+    "structure", "screens", "lifecycle", "scoring", "difficulty",
     "persistence", "audio", "theme", "hammer",
     "responsive", "edge_cases",
 ]

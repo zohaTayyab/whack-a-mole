@@ -17,6 +17,21 @@ const SELECTORS = {
   gameStatus: "#game-status",
   board: "#board",
   hammer: "#hammer",
+  openSettings: "#open-settings",
+  closeSettings: "#close-settings",
+  mainMenu: "#main-menu",
+  screenTitle: "#screen-title",
+  screenGame: "#screen-game",
+  screenSettings: "#screen-settings",
+  screenOver: "#screen-over",
+};
+
+/* The screens, by the name the rest of the game refers to them by. */
+const SCREEN_ELEMENTS = {
+  title: "screenTitle",
+  game: "screenGame",
+  settings: "screenSettings",
+  over: "screenOver",
 };
 
 const HOLE_LABEL_SELECTOR = ".visually-hidden";
@@ -36,6 +51,9 @@ let difficultyListener = null;
 let soundListener = null;
 let musicVolumeListener = null;
 let darkThemeListener = null;
+let openSettingsListener = null;
+let closeSettingsListener = null;
+let mainMenuListener = null;
 let boardPointerMoveListener = null;
 let boardPointerLeaveListener = null;
 let visibilityListener = null;
@@ -266,6 +284,96 @@ export function setStatusMessage(message) {
   if (elements.gameStatus.textContent.trim() !== message) {
     elements.gameStatus.textContent = message;
   }
+}
+
+/* Screens.
+
+   Hiding is the `hidden` attribute rather than a class, because a hidden
+   screen has to leave the page altogether: out of the tab order, out of the
+   accessibility tree, and out of reach of a find-in-page. A class that only
+   stopped it being painted would leave a keyboard player tabbing into controls
+   they cannot see. */
+
+/**
+ * Shows one screen and hides the rest.
+ *
+ * @param {string} name one of the known screen names
+ * @returns {boolean} whether the name was one the interface knows
+ */
+export function showScreen(name) {
+  if (!elements || !Object.prototype.hasOwnProperty.call(SCREEN_ELEMENTS, name)) {
+    return false;
+  }
+
+  for (const [screen, key] of Object.entries(SCREEN_ELEMENTS)) {
+    elements[key].hidden = screen !== name;
+  }
+
+  return true;
+}
+
+/** @returns {string|null} the screen currently shown, or null before setup */
+export function visibleScreen() {
+  if (!elements) {
+    return null;
+  }
+
+  const shown = Object.entries(SCREEN_ELEMENTS).find(([, key]) => !elements[key].hidden);
+  return shown ? shown[0] : null;
+}
+
+export function onOpenSettings(handler) {
+  if (!elements || openSettingsListener) {
+    return;
+  }
+
+  openSettingsListener = handler;
+  elements.openSettings.addEventListener("click", openSettingsListener);
+}
+
+export function offOpenSettings() {
+  if (!elements || !openSettingsListener) {
+    return;
+  }
+
+  elements.openSettings.removeEventListener("click", openSettingsListener);
+  openSettingsListener = null;
+}
+
+export function onCloseSettings(handler) {
+  if (!elements || closeSettingsListener) {
+    return;
+  }
+
+  closeSettingsListener = handler;
+  elements.closeSettings.addEventListener("click", closeSettingsListener);
+}
+
+export function offCloseSettings() {
+  if (!elements || !closeSettingsListener) {
+    return;
+  }
+
+  elements.closeSettings.removeEventListener("click", closeSettingsListener);
+  closeSettingsListener = null;
+}
+
+export function onMainMenu(handler) {
+  if (!elements || mainMenuListener) {
+    return;
+  }
+
+  mainMenuListener = handler;
+  elements.mainMenu.addEventListener("click", mainMenuListener);
+}
+
+export function offMainMenu() {
+  if (!elements || !mainMenuListener) {
+    return;
+  }
+
+  elements.mainMenu.removeEventListener("click", mainMenuListener);
+  mainMenuListener = null;
 }
 
 export function onStartGame(handler) {

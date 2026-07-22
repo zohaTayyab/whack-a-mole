@@ -43,6 +43,7 @@ measured instead of assumed.
 | --- | --- |
 | `modules` | configuration, best scores, settings, the round timer, and the mole cycle, each given its dependencies by the test |
 | `structure` | semantic markup, heading order, accessible names, and that Game Status is the only announcing region |
+| `screens` | which screen is shown, that hidden screens leave the tab order, and the round transitions that drive them |
 | `lifecycle` | which controls are available in every round state, the status messages, and pause and resume |
 | `scoring` | hits by mouse, keyboard, and touch; one point per mole; nothing scored when paused or finished |
 | `difficulty` | the timing each level promises, the fallback for anything unrecognised, and the in-round lock |
@@ -65,3 +66,5 @@ Two things are worth knowing before writing assertions against this game:
   element, so setting it afterwards leaves the page rendered under the previous scheme.
 - **Reach controls with Tab, not `focus()`.** The focus ring is drawn with `:focus-visible`, which a
   programmatic focus deliberately does not satisfy.
+- **Only one screen is on show at a time.** Anything on another screen is hidden, so it has no size to measure
+  and is absent from the accessibility tree. Reach the screen first, then measure.

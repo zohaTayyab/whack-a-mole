@@ -89,6 +89,7 @@ scripts/preferences-store.js theme and volume settings      (complete)
 scripts/audio-controller.js  generated music and effects    (complete)
 scripts/theme-controller.js  light and dark themes          (complete)
 scripts/hammer-controller.js hammer cursor and strike       (complete)
+scripts/screen-controller.js which screen is visible        (complete)
 scripts/game-controller.js   round lifecycle and scoring    (complete)
 tests/run.py                 test runner                    (complete)
 tests/modules/               checks that need no browser    (complete)
@@ -119,9 +120,9 @@ Nothing is installed and nothing is downloaded. The runner needs Python 3, plus 
 browser suites and any engine that loads ES modules for the module suite; where one is missing, those suites are
 reported as skipped rather than counted as passing. See [tests/README.md](tests/README.md).
 
-There are 384 checks across eleven suites, covering markup and accessible names, the round lifecycle, scoring by
-mouse, keyboard and touch, difficulty, persistence, audio, themes, the hammer, responsive layout, and the awkward
-cases such as returning through the back/forward cache.
+There are 448 checks across twelve suites, covering markup and accessible names, the round lifecycle, scoring by
+mouse, keyboard and touch, difficulty, persistence, audio, themes, the hammer, the screen flow, responsive layout,
+and the awkward cases such as returning through the back/forward cache.
 
 Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
 

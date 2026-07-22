@@ -11,11 +11,11 @@ DESCRIPTION = "semantic markup, accessible names, and live regions"
 # In document order, which is also the order Tab visits them: the title
 # screen, then the board, then the settings, then game over.
 EXPECTED_NAMES = [
-    "Start Game",
+    "Start Game", "Settings",
     "Hole 1", "Hole 2", "Hole 3", "Hole 4", "Hole 5",
     "Hole 6", "Hole 7", "Hole 8", "Hole 9",
-    "Difficulty", "Sound", "Music Volume", "Dark theme",
-    "Restart Game",
+    "Back", "Difficulty", "Sound", "Music Volume", "Dark theme",
+    "Restart Game", "Main Menu",
 ]
 
 SCREENS = ["screen-title", "screen-game", "screen-settings", "screen-over"]
@@ -113,12 +113,6 @@ def run(browser, url, results):
         browser.eval("document.querySelectorAll('[aria-live]').length"), 0,
     )
 
-    regions = browser.live_regions()
-    results.check("exactly one announcing region", len(regions), 1)
-    if regions:
-        results.check("and it is the status region", regions[0]["role"], "status")
-        results.check("announcing politely", regions[0]["live"], "polite")
-
     names = browser.eval("""
       [...document.querySelectorAll('button, select, input')].map(el =>
         (el.labels && el.labels[0] ? el.labels[0].textContent : el.textContent).trim())
@@ -166,3 +160,17 @@ def run(browser, url, results):
         browser.eval("document.querySelector('#hammer').hasAttribute('tabindex')"),
         False,
     )
+
+    # Last, because it starts a round: a visible mole extends that hole's own
+    # accessible name, which the checks above read.
+    #
+    # A hidden screen leaves the accessibility tree entirely, so the status
+    # region is only exposed once the board is on show.
+    results.check("no region announces before a round begins",
+                  len(browser.live_regions()), 0)
+    browser.eval("document.querySelector('#start-game').click()")
+    regions = browser.live_regions()
+    results.check("exactly one announcing region", len(regions), 1)
+    if regions:
+        results.check("and it is the status region", regions[0]["role"], "status")
+        results.check("announcing politely", regions[0]["live"], "polite")

@@ -37,6 +37,13 @@
           <button class="button button--primary" type="button" id="start-game">
             Start Game
           </button>
+          <button
+            class="button button--secondary"
+            type="button"
+            id="open-settings"
+          >
+            Settings
+          </button>
         </p>
 
         <section class="panel instructions" aria-labelledby="instructions-heading">
@@ -171,6 +178,15 @@
         aria-labelledby="settings-heading"
       >
         <h2 class="screen__title" id="settings-heading">Game Settings</h2>
+        <p class="controls__actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            id="close-settings"
+          >
+            Back
+          </button>
+        </p>
         <form class="settings__form">
           <p class="field">
             <label class="field__label" for="difficulty">Difficulty</label>
@@ -231,12 +247,15 @@
         <h2 class="screen__title" id="over-heading">Game Over</h2>
         <p class="controls__actions">
           <button
-            class="button button--secondary"
+            class="button button--primary"
             type="button"
             id="restart-game"
             disabled
           >
             Restart Game
+          </button>
+          <button class="button button--secondary" type="button" id="main-menu">
+            Main Menu
           </button>
         </p>
       </section>

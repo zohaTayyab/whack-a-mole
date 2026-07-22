@@ -9,6 +9,7 @@ import { createPreferencesStore } from "./preferences-store.js";
 import { createAudioController } from "./audio-controller.js";
 import { createThemeController } from "./theme-controller.js";
 import { createHammerController } from "./hammer-controller.js";
+import { createScreenController } from "./screen-controller.js";
 import { createGameController } from "./game-controller.js";
 
 if (initializeInterface()) {
@@ -24,6 +25,12 @@ if (initializeInterface()) {
   const bestScoreStore = createBestScoreStore();
   const audio = createAudioController();
   const hammer = createHammerController();
+  const screens = createScreenController();
+
+  /* Connected before the game, so the opening screen is in place before the
+     controller asserts the state it opens in. */
+  screens.connect();
+
   const gameController = createGameController({
     moleCycle,
     roundTimer,
@@ -31,6 +38,7 @@ if (initializeInterface()) {
     audio,
     preferences,
     hammer,
+    screens,
   });
 
   gameController.connect();
@@ -50,6 +58,7 @@ if (initializeInterface()) {
     }
 
     gameController.disconnect();
+    screens.disconnect();
     themeController.disconnect();
   });
 }
