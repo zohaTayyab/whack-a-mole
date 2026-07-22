@@ -426,8 +426,8 @@ export function setDarkThemeSelected(isDark) {
 
 /**
  * Pins the document to one theme. The stylesheet follows the operating system
- * until this attribute appears, so it is only ever set for a deliberate
- * choice.
+ * until this attribute appears, after which the theme controller owns it and
+ * keeps it in step with either the player's choice or the system.
  */
 export function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
