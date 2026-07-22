@@ -14,7 +14,8 @@ countdown reaches zero the round ends and reports the final score. Backgrounding
 returns to it with the same remaining time, and leaving the page and returning with the browser's Back button
 restores it ready to play.
 
-Cross-browser checks and deployment are Milestone 11 and have not been carried out yet.
+The visual design pass is Milestone 11, and cross-browser checks and deployment are Milestone 12. Neither has
+been carried out yet.
 
 ## Features
 
@@ -126,7 +127,7 @@ Not carried out:
 - Selecting a difficulty with the arrow keys, Home, or End. The control is a native select and the page does not
   intercept those keys, but headless Chrome provides no native select menu to act on them.
 
-Cross-browser and device testing belongs to Milestone 11.
+Cross-browser and device testing belongs to Milestone 12.
 
 ## Roadmap
 
@@ -141,6 +142,9 @@ Cross-browser and device testing belongs to Milestone 11.
 - [x] **Milestone 9 — Theme, hammer, and volume.** Light and dark themes, a hammer cursor and strike, and a
       background-music volume control.
 - [x] **Milestone 10 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
-- [ ] **Milestone 11 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.
+- [ ] **Milestone 11 — Visual design and interface polish.** A bolder visual identity across the palette,
+      typography, spacing, board and panel layout, and gameplay feedback, with contrast re-measured in both
+      themes.
+- [ ] **Milestone 12 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.
 
 Milestones are implemented one at a time, each leaving the application in a working state.
