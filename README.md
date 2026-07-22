@@ -90,6 +90,9 @@ scripts/audio-controller.js  generated music and effects    (complete)
 scripts/theme-controller.js  light and dark themes          (complete)
 scripts/hammer-controller.js hammer cursor and strike       (complete)
 scripts/game-controller.js   round lifecycle and scoring    (complete)
+tests/run.py                 test runner                    (complete)
+tests/modules/               checks that need no browser    (complete)
+tests/suites/                browser-driven checks          (complete)
 ```
 
 ## Running locally
@@ -107,6 +110,18 @@ Then visit <http://localhost:8000>.
 
 The game has no build step and no test framework. It is verified in two ways: module-level checks run against the
 source with dependencies supplied by the test, and behavioural checks driven against a real browser.
+
+```sh
+python3 tests/run.py
+```
+
+Nothing is installed and nothing is downloaded. The runner needs Python 3, plus Chrome or Chromium for the
+browser suites and any engine that loads ES modules for the module suite; where one is missing, those suites are
+reported as skipped rather than counted as passing. See [tests/README.md](tests/README.md).
+
+There are 384 checks across eleven suites, covering markup and accessible names, the round lifecycle, scoring by
+mouse, keyboard and touch, difficulty, persistence, audio, themes, the hammer, responsive layout, and the awkward
+cases such as returning through the back/forward cache.
 
 Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
 

@@ -9,3 +9,7 @@ Thumbs.db
 # Logs and dependencies
 *.log
 node_modules/
+
+# Test runner byte code
+__pycache__/
+*.pyc
