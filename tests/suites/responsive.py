@@ -153,5 +153,14 @@ def run(browser, url, results):
       })()
     """)
     results.at_least("every enabled control can be reached", reachable, 12)
-    results.check("nothing is removed from the tab order with a negative index",
-                  browser.eval("document.querySelectorAll('[tabindex=\"-1\"]').length"), 0)
+    # A screen's heading is made programmatically focusable so focus can land on
+    # it when that screen is entered. That is the only use of a negative
+    # tabindex: no interactive control is taken out of the tab order.
+    results.check("no interactive control is removed from the tab order",
+                  browser.eval("document.querySelectorAll("
+                               "'button[tabindex=\"-1\"], a[tabindex=\"-1\"], "
+                               "select[tabindex=\"-1\"], input[tabindex=\"-1\"], "
+                               "[tabindex=\"-1\"][role]').length"), 0)
+    results.check("only the screen headings are made programmatically focusable",
+                  browser.eval("[...document.querySelectorAll('[tabindex=\"-1\"]')]"
+                               ".every(el => el.classList.contains('screen__title'))"), True)

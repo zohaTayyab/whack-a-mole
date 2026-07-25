@@ -38,6 +38,8 @@ def run(browser, url, results):
     browser.navigate(url)
 
     results.check("the game opens on the title screen", visible(browser), "screen-title")
+    results.check("the opening screen appears without taking focus",
+                  browser.eval("document.activeElement === document.body"), True)
     results.check("and only one screen is on show",
                   len(browser.eval(VISIBLE)), 1)
     results.check("the title screen offers only its own controls",
@@ -60,16 +62,36 @@ def run(browser, url, results):
     browser.eval("document.querySelector('#open-settings').click()")
     time.sleep(0.2)
     results.check("Settings opens the settings screen", visible(browser), "screen-settings")
+    results.check("and focus moves to its heading",
+                  browser.eval("document.activeElement.id"), "settings-heading")
     results.check("which offers only its own controls", browser.eval(REACHABLE),
                   ["close-settings", "difficulty", "sound", "music-volume", "dark-theme"])
     browser.eval("document.querySelector('#close-settings').click()")
     time.sleep(0.2)
     results.check("Back returns to where it was opened from",
                   visible(browser), "screen-title")
+    results.check("and focus follows to that screen's heading",
+                  browser.eval("document.activeElement.id"), "title-heading")
+
+    # Escape is the other way out of settings, and lands focus the same way.
+    browser.eval("document.querySelector('#open-settings').click()")
+    time.sleep(0.2)
+    browser.press_key("Escape")
+    time.sleep(0.2)
+    results.check("Escape leaves settings", visible(browser), "screen-title")
+    results.check("returning focus to the heading",
+                  browser.eval("document.activeElement.id"), "title-heading")
+    # Escape is a way out of settings only, not a global shortcut.
+    browser.press_key("Escape")
+    time.sleep(0.2)
+    results.check("and does nothing from another screen",
+                  visible(browser), "screen-title")
 
     # The round drives the screens.
     game.start_round(browser)
     results.check("starting a round shows the board", visible(browser), "screen-game")
+    results.check("and focus moves to the board heading",
+                  browser.eval("document.activeElement.id"), "game-heading")
     results.check("and the board is what can be reached",
                   browser.eval(REACHABLE)[0].startswith("Hole"), True)
 
@@ -82,6 +104,13 @@ def run(browser, url, results):
 
     results.ok("the round reaches game over", game.wait_for_game_over(browser))
     results.check("game over shows the game over screen", visible(browser), "screen-over")
+    results.check("focus moves to the game over heading",
+                  browser.eval("document.activeElement.id"), "over-heading")
+    # The screen change speaks, through the heading it just moved focus to. The
+    # status region went out of the tree with the board that held it, so it
+    # cannot announce as well: game over is spoken exactly once.
+    results.check("and it is the only thing that announces game over",
+                  len(browser.live_regions()), 0)
     results.check("which offers a way to play again and a way out",
                   browser.eval(REACHABLE), ["restart-game", "main-menu"])
 

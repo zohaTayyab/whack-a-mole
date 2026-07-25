@@ -64,6 +64,14 @@
   font-size: var(--text-xl);
 }
 
+/* The heading is focused when its screen is entered, so the new place is
+   announced and Tab resumes there. It is not a keyboard stop and cannot be
+   tabbed to, so it shows no focus ring; the ring stays reserved for controls a
+   keyboard is actually on. */
+.screen__title:focus {
+  outline: none;
+}
+
 /* The title screen reads as a menu: a single centred column, narrow enough to
    keep the eye on the one thing to do next. The instructions panel resets to
    start-aligned so the numbered steps do not centre. */

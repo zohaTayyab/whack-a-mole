@@ -36,6 +36,7 @@ const SCREEN_ELEMENTS = {
 };
 
 const HOLE_LABEL_SELECTOR = ".visually-hidden";
+const SCREEN_HEADING_SELECTOR = ".screen__title";
 
 const READY_MESSAGE = "Ready to start.";
 const SETUP_FAILED_MESSAGE = "The game could not be set up. Please reload the page.";
@@ -45,6 +46,11 @@ const MOLE_VISIBLE_ATTRIBUTE = "moleVisible";
 const MOLE_VISIBLE_NAME_SUFFIX = ", mole visible";
 
 let elements = null;
+/* Whether a screen has ever been shown. The opening screen simply appears, and
+   moving focus onto it would be taking focus with no navigation behind it,
+   which is the one thing the focus rule forbids. Every screen shown after it is
+   the result of navigating, so its heading is where focus belongs. */
+let screenHasSettled = false;
 let holeActivationListener = null;
 let startGameListener = null;
 let restartGameListener = null;
@@ -58,6 +64,7 @@ let mainMenuListener = null;
 let boardPointerMoveListener = null;
 let boardPointerLeaveListener = null;
 let visibilityListener = null;
+let escapeKeyListener = null;
 
 /**
  * Resolves every required element once so later work never re-queries the DOM.
@@ -301,7 +308,10 @@ export function setStatusMessage(message) {
    they cannot see. */
 
 /**
- * Shows one screen and hides the rest.
+ * Shows one screen and hides the rest. When this is a genuine change of screen
+ * rather than the opening paint, focus is moved to the new screen's heading:
+ * the control the player was on may belong to the screen just hidden, so
+ * leaving focus where it was would strand a keyboard user on something gone.
  *
  * @param {string} name one of the known screen names
  * @returns {boolean} whether the name was one the interface knows
@@ -311,11 +321,29 @@ export function showScreen(name) {
     return false;
   }
 
+  const previous = visibleScreen();
+
   for (const [screen, key] of Object.entries(SCREEN_ELEMENTS)) {
     elements[key].hidden = screen !== name;
   }
 
+  if (screenHasSettled && previous !== name) {
+    focusScreenHeading(name);
+  }
+  screenHasSettled = true;
+
   return true;
+}
+
+/* Sends focus to a screen's heading once that screen is on show. The heading
+   is focusable only programmatically, so this both announces the new place and
+   sets where Tab resumes, without adding a stop of its own to the tab order. */
+function focusScreenHeading(name) {
+  const screen = elements[SCREEN_ELEMENTS[name]];
+  const heading = screen && screen.querySelector(SCREEN_HEADING_SELECTOR);
+  if (heading) {
+    heading.focus();
+  }
 }
 
 /** @returns {string|null} the screen currently shown, or null before setup */
@@ -362,6 +390,31 @@ export function offCloseSettings() {
 
   elements.closeSettings.removeEventListener("click", closeSettingsListener);
   closeSettingsListener = null;
+}
+
+/* Escape is a document-level key rather than one control's, so it is listened
+   for on the document and the caller decides whether it applies. It is used to
+   leave the settings screen, which the visible Back control also does. */
+export function onEscapeKey(handler) {
+  if (escapeKeyListener) {
+    return;
+  }
+
+  escapeKeyListener = (event) => {
+    if (event.key === "Escape") {
+      handler(event);
+    }
+  };
+  document.addEventListener("keydown", escapeKeyListener);
+}
+
+export function offEscapeKey() {
+  if (!escapeKeyListener) {
+    return;
+  }
+
+  document.removeEventListener("keydown", escapeKeyListener);
+  escapeKeyListener = null;
 }
 
 export function onMainMenu(handler) {

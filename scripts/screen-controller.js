@@ -6,8 +6,10 @@
 
 import {
   offCloseSettings,
+  offEscapeKey,
   offOpenSettings,
   onCloseSettings,
+  onEscapeKey,
   onOpenSettings,
   showScreen,
   visibleScreen,
@@ -54,6 +56,14 @@ export function createScreenController() {
     show(returnTo);
   }
 
+  /* Escape leaves the settings screen and nothing else: it is a way back, not a
+     global shortcut, so it is ignored while any other screen is on show. */
+  function handleEscape() {
+    if (visibleScreen() === Screen.Settings) {
+      handleCloseSettings();
+    }
+  }
+
   return {
     /** Shows the opening screen and starts listening. Repeated calls do nothing further. */
     connect() {
@@ -66,6 +76,7 @@ export function createScreenController() {
 
       onOpenSettings(handleOpenSettings);
       onCloseSettings(handleCloseSettings);
+      onEscapeKey(handleEscape);
     },
 
     /* The screen itself is left as it is: the page should not jump somewhere
@@ -78,6 +89,7 @@ export function createScreenController() {
       connected = false;
       offOpenSettings();
       offCloseSettings();
+      offEscapeKey();
     },
 
     show,
