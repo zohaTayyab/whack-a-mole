@@ -64,6 +64,49 @@
   font-size: var(--text-xl);
 }
 
+/* The title screen reads as a menu: a single centred column, narrow enough to
+   keep the eye on the one thing to do next. The instructions panel resets to
+   start-aligned so the numbered steps do not centre. */
+.screen--title,
+.screen--settings {
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+.screen--title {
+  text-align: center;
+}
+
+.screen--title .page-intro {
+  max-width: none;
+}
+
+/* The score to beat, sized to draw the eye without competing with the Play
+   control below it. */
+.title-best {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2xs);
+  color: var(--color-text-muted);
+}
+
+.title-best__value {
+  color: var(--color-accent);
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.controls__actions--title {
+  justify-content: center;
+}
+
+.instructions {
+  text-align: start;
+}
+
 /* The board screen puts the readings beside the board once there is room for
    two columns, rather than stacking them above it. */
 @media (min-width: 60rem) {
@@ -152,17 +195,25 @@
 
 /* Settings */
 
+/* A stacked menu: one setting per row. Each field is a plaque carrying its
+   label on one side and its native control on the other, so the four settings
+   read as a short list of choices rather than a dense form. */
 .settings__form {
   display: grid;
-  gap: var(--space-2xs);
+  gap: var(--space-xs);
 }
 
 .field {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2xs);
   min-height: var(--target-min);
+  padding: var(--space-2xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 .field__label {
@@ -171,13 +222,17 @@
 
 /* The label holds the checkbox, so this box is the whole target: it reaches
    the minimum height the control itself does not, and the band above and
-   below the box counts as part of it. */
+   below the box counts as part of it. It fills the row and reverses so the
+   setting reads on the left and its box sits on the right, in line with the
+   controls on the other rows. */
 .field__label--checkbox {
-  display: inline-flex;
+  display: flex;
+  flex-direction: row-reverse;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2xs);
+  width: 100%;
   min-height: var(--target-min);
-  padding-inline-end: var(--space-2xs);
 }
 
 .field__control {
@@ -248,6 +303,14 @@
   transition: background-color var(--motion-duration) ease,
     border-color var(--motion-duration) ease,
     transform var(--motion-duration) ease;
+}
+
+/* The one control the title screen is built around, so it is given more height
+   and a larger label than the secondary actions beside it. */
+.button--large {
+  min-height: 3.25rem;
+  padding-inline: var(--space-lg);
+  font-size: var(--text-lg);
 }
 
 .button--primary {

@@ -33,8 +33,20 @@
           A reaction game. Moles appear at random across a three-by-three
           board, and each one you hit before it disappears adds to your score.
         </p>
-        <p class="controls__actions">
-          <button class="button button--primary" type="button" id="start-game">
+        <!-- The best score for the selected difficulty, shown on the way in as
+             the target to beat. It mirrors the scoreboard reading on the game
+             screen; it is a plain reading, not a live region, so consulting it
+             here announces nothing. -->
+        <p class="title-best">
+          Best Score
+          <span class="title-best__value" id="title-best-score">0</span>
+        </p>
+        <p class="controls__actions controls__actions--title">
+          <button
+            class="button button--primary button--large"
+            type="button"
+            id="start-game"
+          >
             Start Game
           </button>
           <button

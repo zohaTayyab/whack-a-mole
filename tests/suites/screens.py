@@ -135,6 +135,30 @@ def run(browser, url, results):
     results.check("and the title screen is where Back leads",
                   visible(browser), "screen-title")
 
+    # The title screen shows the best score for the selected difficulty as the
+    # score to beat. A round played to the end should leave it there on the way
+    # back, in step with the scoreboard reading it mirrors.
+    game.start_round(browser)
+    for _ in range(4):
+        if game.wait_for_mole(browser) >= 0:
+            browser.eval("""
+              (() => {
+                const hole = [...document.querySelectorAll('.hole')]
+                  .find(hole => hole.dataset.moleVisible === 'true');
+                if (hole) { hole.click(); }
+              })()
+            """)
+        time.sleep(0.15)
+    results.ok("a scoring round reaches game over", game.wait_for_game_over(browser))
+    recorded = game.control_state(browser)["best"]
+    results.at_least("the round set a best score to show", recorded, 1)
+    browser.eval("document.querySelector('#main-menu').click()")
+    time.sleep(0.35)
+    results.check("the title screen shows the best score to beat",
+                  browser.eval(
+                      "document.querySelector('#title-best-score').textContent"),
+                  str(recorded))
+
     # Teardown must leave the screens where they are rather than jumping.
     browser.eval("window.dispatchEvent("
                  "new PageTransitionEvent('pagehide', {persisted: false}))")

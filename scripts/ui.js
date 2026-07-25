@@ -7,6 +7,7 @@ const SELECTORS = {
   score: "#score",
   timeRemaining: "#time-remaining",
   bestScore: "#best-score",
+  titleBestScore: "#title-best-score",
   difficulty: "#difficulty",
   sound: "#sound",
   musicVolume: "#music-volume",
@@ -252,7 +253,9 @@ export function setScore(score) {
 
 /* Best Score carries no aria-live of its own. It is written whenever the
    selection or the round changes, so an unchanged value is left alone: a
-   needless write would be a needless change for anything watching it. */
+   needless write would be a needless change for anything watching it. The same
+   reading is shown on the title screen as the score to beat, so both are kept
+   in step from the one call. */
 export function setBestScore(score) {
   if (!elements) {
     return;
@@ -261,6 +264,9 @@ export function setBestScore(score) {
   const text = String(score);
   if (elements.bestScore.textContent !== text) {
     elements.bestScore.textContent = text;
+  }
+  if (elements.titleBestScore.textContent !== text) {
+    elements.titleBestScore.textContent = text;
   }
 }
 
