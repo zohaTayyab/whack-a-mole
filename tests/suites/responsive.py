@@ -104,6 +104,23 @@ def run(browser, url, results):
         results.ok("{}: nothing on the play screen reaches past the viewport".format(label),
                    play["widest"] <= play["clientWidth"] + 1)
 
+        # The board must be reachable without scrolling for it: on every
+        # supported viewport, portrait and landscape, it fits within the stage
+        # as laid out rather than sitting below the fold.
+        fit = browser.eval("""
+          (() => {
+            const board = document.querySelector('#board').getBoundingClientRect();
+            const stage = document.querySelector('.stage');
+            return {
+              withinViewport: board.bottom <= document.documentElement.clientHeight + 1,
+              stageScrolls: stage.scrollHeight > stage.clientHeight + 1,
+            };
+          })()
+        """)
+        results.ok("{}: the board fits on screen".format(label), fit["withinViewport"])
+        results.ok("{}: the play area does not need to scroll".format(label),
+                   not fit["stageScrolls"])
+
         # A checkbox sits inside its label, so the label is the target: the
         # whole row activates the control, not only the 22px box. Measuring the
         # box alone would measure something the player never has to hit.

@@ -10,7 +10,7 @@
 /* Header */
 
 .page-header {
-  padding-block: var(--space-xl) var(--space-md);
+  padding-block: var(--space-md) var(--space-sm);
   text-align: center;
 }
 
@@ -30,30 +30,32 @@
 }
 
 /* The stage holds the header and the footer in place and gives the rest of the
-   height to this row, so anything that does not fit scrolls here rather than
-   moving the whole page. Containing the overscroll stops a swipe that reaches
-   the end from being handed to the browser, which is what produces the rubber
-   banding and pull-to-refresh that interrupt a round. */
+   height to the one screen on show, so the screen has a definite height to work
+   within and the board can be sized to what is left rather than pushing the
+   page taller than the viewport. If a screen still cannot fit, it scrolls here
+   rather than moving the whole page. Containing the overscroll stops a swipe
+   that reaches the end from being handed to the browser, which is what produces
+   the rubber banding and pull-to-refresh that interrupt a round. */
 .stage {
   display: grid;
-  gap: var(--space-md);
-  align-content: start;
-  padding-block-end: var(--space-lg);
+  grid-template-rows: minmax(0, 1fr);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-/* One screen: a column of its own panels. Every screen is shown at once until
-   the controller that shows one at a time arrives, so each is separated
-   clearly enough to be read as its own place. */
+/* One screen, filling the stage. A menu holds its content at the top and lets
+   the rest stay open; the game screen overrides this to give the leftover
+   height to the board. */
 .screen {
   display: grid;
   /* A single column capped at the container: without the minmax a grid track
      grows to its widest child's content, which lets a tight row like the
      heads-up display push the whole screen wider than the viewport. */
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-sm);
   align-content: start;
+  gap: var(--space-sm);
+  min-block-size: 100%;
+  padding-block-end: var(--space-md);
 }
 
 /* Setting display on the screen overrides the display: none the browser gives
@@ -119,13 +121,67 @@
   text-align: start;
 }
 
-/* The game screen is a centred column: the heads-up display, then the board,
-   with the status line between them. Keeping it to one column puts the score
-   and the countdown directly above the board rather than off to one side. */
+/* The game screen is a centred column: the heads-up display and the status
+   line at their natural height, and the board taking all the height that is
+   left. Keeping it to one column puts the score and the countdown directly
+   above the board rather than off to one side. The board row keeps a floor, so
+   on a screen too short to hold everything the board stays playable and the
+   stage scrolls the little that is needed rather than the board collapsing. */
 .screen--game {
   width: 100%;
   max-width: 34rem;
   margin-inline: auto;
+  grid-template-rows: auto auto minmax(15rem, 1fr);
+  align-content: stretch;
+  gap: var(--space-2xs);
+}
+
+/* The play panels give their room to the board: tighter padding than a reading
+   panel, and no shadow competing with the board's own. */
+.screen--game .panel {
+  padding: var(--space-2xs) var(--space-sm);
+  box-shadow: none;
+}
+
+/* Landscape and short: the display and status move beside the board rather than
+   stacking above it, so the board can take the full height a short viewport
+   still has. */
+@media (min-width: 34rem) and (max-height: 34rem) {
+  .screen--game {
+    max-width: none;
+    grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "hud    board"
+      "status board";
+    align-content: stretch;
+    column-gap: var(--space-sm);
+  }
+
+  .screen--game .hud {
+    grid-area: hud;
+  }
+
+  .screen--game .status {
+    grid-area: status;
+  }
+
+  .screen--game .board-panel {
+    grid-area: board;
+  }
+}
+
+/* Desktop: a wider frame and a larger board, so the screen reads as laid out
+   for the space rather than a phone column stranded in the middle. */
+@media (min-width: 64rem) and (min-height: 36rem) {
+  .screen--game {
+    max-width: 46rem;
+    gap: var(--space-sm);
+  }
+
+  .board {
+    inline-size: min(100cqi, 100cqb, 40rem);
+  }
 }
 
 /* The board heading names the screen for assistive technology; the display
@@ -500,11 +556,11 @@
 
 .status__message {
   display: block;
-  /* Three lines are reserved because status messages differ in length: without
-     this the panel would resize mid-round and shift the board under the
-     player. Three is what the game-over message needs on a narrow screen. The
-     factor is the inherited line height. */
-  min-block-size: calc(3 * 1.6em);
+  /* Two lines are reserved because status messages differ in length: without
+     this the panel would resize mid-round and shift the board under the player.
+     Two is enough now that the long game-over message has its own screen and no
+     longer appears here. The factor is the inherited line height. */
+  min-block-size: calc(2 * 1.6em);
   color: var(--color-primary-strong);
   font-size: var(--text-lg);
   font-weight: 500;
@@ -518,8 +574,15 @@
   grid-template-rows: repeat(3, 1fr);
   gap: var(--space-2xs);
   aspect-ratio: 1;
-  max-width: 34rem;
-  margin-inline: auto;
+  /* A square sized to fit the space it is given in both directions. The
+     fallback is width-based for engines without container units; where they
+     are supported the second rule wins and the board also respects the height
+     left under the display and status, so the whole screen fits without
+     scrolling. */
+  inline-size: min(100%, 34rem);
+  inline-size: min(100cqi, 100cqb, 34rem);
+  block-size: auto;
+  margin: auto;
   padding: 0;
   list-style: none;
 }
@@ -633,8 +696,15 @@
    positioned against the board panel and never takes pointer events, so it can
    sit over the holes without intercepting a single click. */
 
+/* A size container so the board can measure itself against the panel and be
+   sized to fit, rather than the panel growing to fit the board. Centred, so a
+   board narrower than a wide panel sits in the middle rather than to one side. */
 .board-panel {
   position: relative;
+  container-type: size;
+  display: grid;
+  place-content: center;
+  min-block-size: 0;
 }
 
 .hammer {
@@ -778,10 +848,22 @@
 /* Footer */
 
 .page-footer {
-  margin-block-start: var(--space-lg);
-  padding-block: var(--space-md);
+  padding-block: var(--space-sm);
   border-block-start: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   text-align: center;
+}
+
+/* Short viewports — small phones, landscape, small windows, high zoom — give
+   the shell chrome back to the board: the footer steps aside and the header
+   slims to a title bar, so the play area keeps the height it needs. */
+@media (max-height: 36rem) {
+  .page-header {
+    padding-block: var(--space-2xs);
+  }
+
+  .page-footer {
+    display: none;
+  }
 }
