@@ -30,7 +30,7 @@ from support.server import StaticServer                 # noqa: E402
 
 BROWSER_SUITES = [
     "structure", "screens", "lifecycle", "scoring", "difficulty",
-    "persistence", "audio", "theme", "hammer",
+    "persistence", "audio", "theme", "contrast", "hammer",
     "responsive", "edge_cases",
 ]
 

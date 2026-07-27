@@ -13,13 +13,25 @@ NAME = "theme"
 DESCRIPTION = "system scheme, explicit choice, and what counts as a choice"
 
 PREFS_KEY = "whack-a-mole.preferences.v1"
-LIGHT_CANVAS = "rgb(242, 239, 230)"
-DARK_CANVAS = "rgb(22, 20, 15)"
+
+# Palette-independent: a light theme resolves a light canvas and a dark theme a
+# dark one, whatever the exact colours are. Measured from what the browser
+# actually paints, so a change of palette is judged on staying light or dark,
+# not on matching a fixed value written down beforehand. Legibility is measured
+# separately in the contrast suite.
+CANVAS_IS_LIGHT = r"""
+(() => {
+  const parts = getComputedStyle(document.body).backgroundColor.match(/[\d.]+/g);
+  const [r, g, b] = parts.slice(0, 3).map(Number).map(v => v / 255)
+    .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.5;
+})()
+"""
 
 
 def state(browser):
     return {
-        "canvas": browser.eval("getComputedStyle(document.body).backgroundColor"),
+        "light": browser.eval(CANVAS_IS_LIGHT),
         "theme": browser.eval("document.documentElement.dataset.theme"),
         "checked": browser.eval("document.querySelector('#dark-theme').checked"),
         "stored": browser.eval("localStorage.getItem('{}')".format(PREFS_KEY)),
@@ -34,7 +46,7 @@ def run(browser, url, results):
     browser.navigate(url)
 
     opened = state(browser)
-    results.check("opens light under a light system", opened["canvas"], LIGHT_CANVAS)
+    results.check("opens light under a light system", opened["light"], True)
     results.check("the checkbox agrees", opened["checked"], False)
     results.check("matching the system stores nothing", opened["stored"], None)
 
@@ -42,7 +54,7 @@ def run(browser, url, results):
     time.sleep(0.4)
     followed = state(browser)
     results.check("follows the system to dark without a reload",
-                  followed["canvas"], DARK_CANVAS)
+                  followed["light"], False)
     results.check("the root attribute follows", followed["theme"], "dark")
     results.check("the checkbox follows", followed["checked"], True)
     results.check("following the system still stores nothing", followed["stored"], None)
@@ -50,28 +62,28 @@ def run(browser, url, results):
     browser.color_scheme("light")
     time.sleep(0.4)
     back = state(browser)
-    results.check("follows the system back to light", back["canvas"], LIGHT_CANVAS)
+    results.check("follows the system back to light", back["light"], True)
     results.check("the checkbox follows back", back["checked"], False)
     results.check("and still stores nothing", back["stored"], None)
 
     browser.eval("document.querySelector('#dark-theme').click()")
     time.sleep(0.35)
     chosen = state(browser)
-    results.check("choosing dark applies dark", chosen["canvas"], DARK_CANVAS)
+    results.check("choosing dark applies dark", chosen["light"], False)
     results.ok("the choice is recorded", "dark" in (chosen["stored"] or ""))
 
     browser.color_scheme("light")
     time.sleep(0.4)
     results.check("a system change cannot override the choice",
-                  state(browser)["canvas"], DARK_CANVAS)
+                  state(browser)["light"], False)
     browser.color_scheme("dark")
     time.sleep(0.4)
-    results.check("nor can a system change back", state(browser)["canvas"], DARK_CANVAS)
+    results.check("nor can a system change back", state(browser)["light"], False)
 
     browser.color_scheme("light")
     browser.navigate(url)
     results.check("the choice survives a reload under a light system",
-                  state(browser)["canvas"], DARK_CANVAS)
+                  state(browser)["light"], False)
 
     # Clearing the record hands control back to the system on the next load:
     # the store keeps its answer for the session so settings survive storage
@@ -81,11 +93,11 @@ def run(browser, url, results):
     browser.navigate(url)
     cleared = state(browser)
     results.check("with the record cleared the system decides again",
-                  cleared["canvas"], DARK_CANVAS)
+                  cleared["light"], False)
     results.check("and nothing has been written back", cleared["stored"], None)
     browser.color_scheme("light")
     time.sleep(0.4)
-    results.check("and it goes on following", state(browser)["canvas"], LIGHT_CANVAS)
+    results.check("and it goes on following", state(browser)["light"], True)
 
     # Teardown must release the subscription.
     browser.eval("localStorage.removeItem('{}')".format(PREFS_KEY))
@@ -112,26 +124,12 @@ def run(browser, url, results):
     results.check("a persisted pagehide leaves the page still following",
                   state(browser)["theme"], "light")
 
-    # Both palettes have to be legible, not merely different.
-    for scheme, canvas in (("light", LIGHT_CANVAS), ("dark", DARK_CANVAS)):
-        browser.eval("localStorage.removeItem('{}')".format(PREFS_KEY))
-        browser.color_scheme(scheme)
-        browser.navigate(url)
-        results.check("{}: the canvas is the expected colour".format(scheme),
-                      browser.eval("getComputedStyle(document.body).backgroundColor"),
-                      canvas)
-        ratio = browser.eval("""
-          (() => {
-            const luminance = (colour) => {
-              const [r, g, b] = colour.match(/\\d+/g).slice(0, 3).map(Number)
-                .map(v => v / 255)
-                .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
-              return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-            };
-            const style = getComputedStyle(document.body);
-            const a = luminance(style.color) + 0.05;
-            const b = luminance(style.backgroundColor) + 0.05;
-            return Math.round((Math.max(a, b) / Math.min(a, b)) * 100) / 100;
-          })()
-        """)
-        results.at_least("{}: body text meets 4.5:1".format(scheme), ratio, 4.5)
+    # The two palettes must actually be a light one and a dark one, not the same
+    # canvas twice. Legibility within each is the contrast suite's job.
+    browser.eval("localStorage.removeItem('{}')".format(PREFS_KEY))
+    browser.color_scheme("light")
+    browser.navigate(url)
+    results.check("a light system paints a light canvas", state(browser)["light"], True)
+    browser.color_scheme("dark")
+    browser.navigate(url)
+    results.check("a dark system paints a dark canvas", state(browser)["light"], False)

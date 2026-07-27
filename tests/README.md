@@ -49,7 +49,8 @@ measured instead of assumed.
 | `difficulty` | the timing each level promises, the fallback for anything unrecognised, and the in-round lock |
 | `persistence` | best scores per difficulty, and storage that is denied, empty, or holding nonsense |
 | `audio` | the sound control, music volume, and browsers that offer audio then refuse it |
-| `theme` | following the system, an explicit choice outranking it, and what does not count as a choice |
+| `theme` | following the system, an explicit choice outranking it, and what does not count as a choice, judged on whether the canvas stays light or dark rather than on fixed colours |
+| `contrast` | WCAG contrast ratios computed from the colours the browser resolves, across both themes and every screen, asserted against the AA thresholds |
 | `hammer` | that the decoration never takes a pointer event, enters the tab order, or affects the score |
 | `responsive` | nine viewports in portrait and landscape, sideways overflow, the board fitting on screen without scrolling, target sizes, and a focus ring reached with Tab |
 | `edge-cases` | the back/forward cache, hammering the controls, resizing mid-round, and cleanup |

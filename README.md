@@ -135,9 +135,10 @@ Nothing is installed and nothing is downloaded. The runner needs Python 3, plus 
 browser suites and any engine that loads ES modules for the module suite; where one is missing, those suites are
 reported as skipped rather than counted as passing. See [tests/README.md](tests/README.md).
 
-There are 510 checks across twelve suites, covering markup and accessible names, the round lifecycle, scoring by
-mouse, keyboard and touch, difficulty, persistence, audio, themes, the hammer, the screen flow, responsive layout,
-and the awkward cases such as returning through the back/forward cache.
+There are 558 checks across thirteen suites, covering markup and accessible names, the round lifecycle, scoring by
+mouse, keyboard and touch, difficulty, persistence, audio, themes, colour contrast measured against the WCAG
+thresholds, the hammer, the screen flow, responsive layout, and the awkward cases such as returning through the
+back/forward cache.
 
 Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
 
@@ -149,7 +150,8 @@ Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
 - Mouse activation, and touch activation through the browser's touch emulation.
 - Layout at 320, 375, 390, 768, 1024, 1280, and 1440 CSS pixels wide, in portrait and landscape, and at 200%
   zoom, with the board fitting on screen without scrolling in each.
-- Colour contrast in both themes, measured against the colours the browser actually resolves.
+- Colour contrast across every screen in both themes, computed from the colours the browser resolves and asserted
+  against the WCAG AA thresholds rather than fixed values.
 - Reduced-motion behaviour.
 - Round lifecycle, scoring, timing, difficulty, persistence, audio, themes, volume, the hammer, and the player's
   Pause control.
