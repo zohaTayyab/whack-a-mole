@@ -7,18 +7,29 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 10 (accessibility and edge cases) is complete. A round lasts 60 seconds at every difficulty. Moles
-appear in random holes, one at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard
-adds one point; each mole counts at most once. Restart Game begins a fresh round at any point, and when the
-countdown reaches zero the round ends and reports the final score. Backgrounding the page pauses the round and
-returns to it with the same remaining time, and leaving the page and returning with the browser's Back button
-restores it ready to play.
+Milestone 11 (application shell and screen flow) is complete. The game is organised into four screens — title,
+game, settings, and game over — shown one at a time on a full-screen stage. Focus moves to a screen's heading as
+it opens, and Escape leaves the settings screen. A round lasts 60 seconds at every difficulty. Moles appear in
+random holes, one at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard adds one
+point; each mole counts at most once. During play a heads-up display shows the score and a countdown bar with the
+seconds beside it, and two icon controls pause or restart the round. When the countdown reaches zero the round
+ends on the game-over screen, which reports the final score and the best score and notes whether a record was set,
+with Play Again and Menu. The board is sized to fit the screen in portrait and landscape, from small phones to
+desktops. Backgrounding the page pauses the round and returns to it with the same remaining time; leaving and
+returning with the browser's Back button restores it ready to play.
 
-The application shell and screen flow are Milestone 11, the visual identity and animation are Milestone 12, and
-cross-browser checks and deployment are Milestone 13. None of these have been carried out yet.
+The visual identity and animation are Milestone 12, and cross-browser checks and deployment are Milestone 13.
+Neither has been carried out yet.
 
 ## Features
 
+- **Screens.** The game is four screens — title, game, settings, and game over — shown one at a time on a
+  full-screen stage. The title screen leads with the best score and a large Play control; settings gathers
+  difficulty, sound, music volume, and theme as a stacked menu; game over reports the outcome. The round itself
+  drives the screen changes, so the game is always where the play is.
+- **Heads-up display.** During a round the score and a countdown bar with the seconds beside it sit on the play
+  surface, and two icon controls pause or restart. Pause is the player's own: a round the player pauses stays
+  paused when the page is hidden and shown again, rather than resuming on its own.
 - **Difficulty.** Easy, Normal, and Hard change how long each mole stays visible, and so how much time there is
   to react. The difficulty is fixed for the duration of a round and can be changed again once the round ends.
 - **Best scores.** A best score is kept separately for each difficulty and survives a reload. Only a completed
@@ -50,9 +61,13 @@ cross-browser checks and deployment are Milestone 13. None of these have been ca
 ## Accessibility
 
 - **One announcement region.** Game Status is the only live region on the page, so starting, pausing, resuming,
-  hitting a mole, and game over are announced, and nothing else is. The score, the countdown, and the best score
-  are a description list of readings rather than form output, so they can be consulted at any time without the
-  countdown interrupting every second.
+  and hitting a mole are announced, and nothing else is. The score and the countdown are a description list of
+  readings rather than form output, so they can be consulted at any time without the countdown interrupting every
+  second.
+- **Screen navigation.** When a screen opens, focus moves to its heading, so a keyboard user is never left on a
+  control that has gone; the settings screen is left with Escape or a visible Back control. Game over is announced
+  exactly once: the status region is on the game screen and steps out of the tree with it, so the game-over
+  heading is the single voice, and its description carries the final score and any record.
 - **Native controls.** Every control is the element the browser already understands: buttons for the holes and
   the actions, a select for difficulty, checkboxes for sound and theme, and a range for volume. Each has an
   associated label, its own keyboard behaviour, and a disabled state that matches the point the round has reached.
@@ -120,19 +135,24 @@ Nothing is installed and nothing is downloaded. The runner needs Python 3, plus 
 browser suites and any engine that loads ES modules for the module suite; where one is missing, those suites are
 reported as skipped rather than counted as passing. See [tests/README.md](tests/README.md).
 
-There are 448 checks across twelve suites, covering markup and accessible names, the round lifecycle, scoring by
+There are 510 checks across twelve suites, covering markup and accessible names, the round lifecycle, scoring by
 mouse, keyboard and touch, difficulty, persistence, audio, themes, the hammer, the screen flow, responsive layout,
 and the awkward cases such as returning through the back/forward cache.
 
 Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
 
-- Page structure, accessible names, and the accessibility tree, including which regions announce changes.
-- Keyboard operation with Tab, Enter, Space, the arrow keys, Home, and End.
+- Page structure, accessible names, and the accessibility tree for each of the four screens, including which
+  regions announce changes.
+- The screen flow: one screen visible at a time, hidden screens out of the tab order and the accessibility tree,
+  focus moving to each screen's heading on navigation, Escape leaving settings, and game over announced once.
+- The keyboard path through all four screens, with Tab, Enter, Space, Escape, the arrow keys, Home, and End.
 - Mouse activation, and touch activation through the browser's touch emulation.
-- Layout at 320, 375, 768, 1280, and 1440 CSS pixels wide, in portrait and landscape, and at 200% zoom.
+- Layout at 320, 375, 390, 768, 1024, 1280, and 1440 CSS pixels wide, in portrait and landscape, and at 200%
+  zoom, with the board fitting on screen without scrolling in each.
 - Colour contrast in both themes, measured against the colours the browser actually resolves.
 - Reduced-motion behaviour.
-- Round lifecycle, scoring, timing, difficulty, persistence, audio, themes, volume, and the hammer.
+- Round lifecycle, scoring, timing, difficulty, persistence, audio, themes, volume, the hammer, and the player's
+  Pause control.
 - Behaviour when storage is denied or holds corrupt data, and when the browser refuses to create audio.
 
 Not carried out:
@@ -158,7 +178,7 @@ Cross-browser and device testing belongs to Milestone 13.
 - [x] **Milestone 9 — Theme, hammer, and volume.** Light and dark themes, a hammer cursor and strike, and a
       background-music volume control.
 - [x] **Milestone 10 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
-- [ ] **Milestone 11 — Application shell and screen flow.** A full-screen stage with title, game, settings, and
+- [x] **Milestone 11 — Application shell and screen flow.** A full-screen stage with title, game, settings, and
       game-over screens, and accessible navigation between them.
 - [ ] **Milestone 12 — Visual identity and animation.** Illustrated scenery, board and character artwork, and a
       shared motion system for screen transitions, controls, and game feedback.

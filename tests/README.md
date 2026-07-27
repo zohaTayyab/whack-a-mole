@@ -43,7 +43,7 @@ measured instead of assumed.
 | --- | --- |
 | `modules` | configuration, best scores, settings, the round timer, and the mole cycle, each given its dependencies by the test |
 | `structure` | semantic markup, heading order, accessible names, and that Game Status is the only announcing region |
-| `screens` | which screen is shown, that hidden screens leave the tab order, and the round transitions that drive them |
+| `screens` | which screen is shown, that hidden screens leave the tab order, focus moving to each heading on navigation, Escape leaving settings, game over announced once, and the round transitions that drive them |
 | `lifecycle` | which controls are available in every round state, the status messages, and pause and resume |
 | `scoring` | hits by mouse, keyboard, and touch; one point per mole; nothing scored when paused or finished |
 | `difficulty` | the timing each level promises, the fallback for anything unrecognised, and the in-round lock |
@@ -51,7 +51,7 @@ measured instead of assumed.
 | `audio` | the sound control, music volume, and browsers that offer audio then refuse it |
 | `theme` | following the system, an explicit choice outranking it, and what does not count as a choice |
 | `hammer` | that the decoration never takes a pointer event, enters the tab order, or affects the score |
-| `responsive` | nine viewports, sideways overflow, target sizes, and a focus ring reached with Tab |
+| `responsive` | nine viewports in portrait and landscape, sideways overflow, the board fitting on screen without scrolling, target sizes, and a focus ring reached with Tab |
 | `edge-cases` | the back/forward cache, hammering the controls, resizing mid-round, and cleanup |
 
 ## Writing a suite
