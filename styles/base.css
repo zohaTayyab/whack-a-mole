@@ -27,6 +27,16 @@
   --color-soil-muted: light-dark(#6d6152, #2e2921);
   --color-focus: light-dark(#1b4bb8, #8ab4ff);
 
+  /* Display lettering. A fill, an edge for the layered outline, a highlight for
+     the raised top, and a cast for the drop shadow — a day and a night value
+     each. The letters stay real text, styled with layered strokes and shadows,
+     so they remain selectable, translatable, and available to assistive
+     technology; nothing here is a font file or an image. */
+  --color-display-fill: light-dark(#2c6647, #8ecfa6);
+  --color-display-edge: light-dark(#fbf7ee, #0e1f16);
+  --color-display-highlight: light-dark(#5a8f6f, #bfe6cd);
+  --color-display-cast: light-dark(rgb(31 76 52 / 0.30), rgb(0 0 0 / 0.55));
+
   /* Typography */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
@@ -45,12 +55,25 @@
   --space-lg: 2rem;
   --space-xl: 3rem;
 
-  /* Shape and depth */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 1rem;
-  /* A dark surface needs a deeper shadow to read as raised at all. */
-  --shadow-sm: 0 1px 2px light-dark(rgb(43 40 35 / 0.08), rgb(0 0 0 / 0.5));
+  /* Shape: a deliberate radius scale, tightest for inset controls and widest
+     for the plaques that sit over the scenery, plus a full pill for the bar. */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Elevation: a three-step scale of layered shadows rather than one hairline,
+     so a raised thing reads as raised — a near shadow for the edge and a far,
+     softer one for the cast. A dark scene needs deeper, softer shadows to show
+     at all, so each step carries a light and a night value. */
+  --elevation-1: 0 1px 2px light-dark(rgb(38 30 20 / 0.10), rgb(0 0 0 / 0.5));
+  --elevation-2: 0 1px 2px light-dark(rgb(38 30 20 / 0.08), rgb(0 0 0 / 0.45)),
+    0 6px 16px light-dark(rgb(38 30 20 / 0.10), rgb(0 0 0 / 0.42));
+  --elevation-3: 0 2px 4px light-dark(rgb(38 30 20 / 0.10), rgb(0 0 0 / 0.5)),
+    0 16px 32px light-dark(rgb(38 30 20 / 0.16), rgb(0 0 0 / 0.55));
+  /* The base step under its former name, so existing surfaces keep their depth. */
+  --shadow-sm: var(--elevation-1);
 
   /* Motion. Overridden to zero under prefers-reduced-motion. */
   --motion-duration: 150ms;

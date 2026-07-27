@@ -14,9 +14,26 @@
   text-align: center;
 }
 
+/* The logo: real text given a chunky illustrated look with layered strokes and
+   a cast shadow. The outline is eight offset copies of the edge colour, so the
+   letters read as their own shape over the scenery; the fill and the highlight
+   give them a little roundness. No font file and no image — this stays
+   selectable text. */
 .page-title {
   font-size: var(--text-display);
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
+  color: var(--color-display-fill);
+  text-shadow:
+    0 -2px 0 var(--color-display-edge),
+    0 2px 0 var(--color-display-edge),
+    -2px 0 0 var(--color-display-edge),
+    2px 0 0 var(--color-display-edge),
+    -1.5px -1.5px 0 var(--color-display-edge),
+    1.5px -1.5px 0 var(--color-display-edge),
+    -1.5px 1.5px 0 var(--color-display-edge),
+    1.5px 1.5px 0 var(--color-display-edge),
+    0 -1px 0 var(--color-display-highlight),
+    0 7px 12px var(--color-display-cast);
 }
 
 /* Measured rather than full width, so a line stays comfortable to read. It is
@@ -66,8 +83,14 @@
   display: none;
 }
 
+/* Screen titles: the same family as the logo but quieter — the text keeps its
+   readable colour and is given a raised top highlight and a soft cast, so it
+   reads as display lettering without competing with the logo above it. */
 .screen__title {
   font-size: var(--text-xl);
+  text-shadow:
+    0 1px 0 var(--color-display-highlight),
+    0 3px 8px var(--color-display-cast);
 }
 
 /* The heading is focused when its screen is entered, so the new place is
@@ -137,10 +160,10 @@
 }
 
 /* The play panels give their room to the board: tighter padding than a reading
-   panel, and no shadow competing with the board's own. */
+   panel, while keeping the same raised plaque so they read as sitting over the
+   scenery. */
 .screen--game .panel {
   padding: var(--space-2xs) var(--space-sm);
-  box-shadow: none;
 }
 
 /* Landscape and short: the display and status move beside the board rather than
@@ -205,7 +228,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--elevation-2);
 }
 
 .panel__title {
@@ -228,7 +251,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--elevation-2);
 }
 
 .hud__readings {
@@ -289,24 +312,24 @@
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background-color: var(--color-surface-sunken);
   overflow: hidden;
 }
 
 .time-bar::-webkit-progress-bar {
   background-color: var(--color-surface-sunken);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .time-bar::-webkit-progress-value {
   background-color: var(--color-accent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .time-bar::-moz-progress-bar {
   background-color: var(--color-accent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 /* Heads-up controls: two icon buttons, so pause and restart stay one tap away
@@ -425,6 +448,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  box-shadow: var(--elevation-1);
 }
 
 .field__label {
@@ -513,6 +537,7 @@
   font-weight: 600;
   transition: background-color var(--motion-duration) ease,
     border-color var(--motion-duration) ease,
+    box-shadow var(--motion-duration) ease,
     transform var(--motion-duration) ease;
 }
 
@@ -527,10 +552,12 @@
 .button--primary {
   background-color: var(--color-primary);
   color: var(--color-on-primary);
+  box-shadow: var(--elevation-1);
 }
 
 .button--primary:not(:disabled):hover {
   background-color: var(--color-primary-strong);
+  box-shadow: var(--elevation-2);
 }
 
 .button--secondary {
@@ -544,12 +571,14 @@
 
 .button:not(:disabled):active {
   transform: translateY(1px);
+  box-shadow: var(--elevation-1);
 }
 
 .button:disabled {
   background-color: var(--color-surface-sunken);
   border-color: var(--color-border);
   color: var(--color-text-muted);
+  box-shadow: none;
 }
 
 /* Status */
