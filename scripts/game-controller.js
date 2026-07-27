@@ -20,7 +20,9 @@ import {
   offHoleActivate,
   offMainMenu,
   offMusicVolumeChange,
+  offPauseGame,
   offRestartGame,
+  offRestartRound,
   offSoundChange,
   offStartGame,
   onDifficultyChange,
@@ -28,11 +30,17 @@ import {
   onHoleActivate,
   onMainMenu,
   onMusicVolumeChange,
+  onPauseGame,
   onRestartGame,
+  onRestartRound,
   onSoundChange,
   onStartGame,
   setBestScore,
+  setFinalScore,
+  setGameOverSummary,
   setMusicVolume,
+  setPaused,
+  setRecordSet,
   setScore,
   setSoundAvailable,
   setStatusMessage,
@@ -94,7 +102,14 @@ function hitMessage(score) {
 
 function gameOverMessage(score, isNewRecord) {
   const record = isNewRecord ? " New best score." : "";
-  return `Game over. Final score: ${score}.${record} Select Restart Game to play again.`;
+  return `Game over. Final score: ${score}.${record} Select Play Again to play again.`;
+}
+
+/* What the game-over heading announces as it takes focus: the outcome in one
+   line, so it is spoken once without a second live region. */
+function gameOverSummary(score, best, isNewRecord) {
+  const record = isNewRecord ? " New best score." : "";
+  return `Final score ${score}. Best score ${best}.${record}`;
 }
 
 /**
@@ -128,9 +143,22 @@ export function createGameController({
      or record a score for the round that replaced it. */
   let roundId = 0;
 
+  /* Whether the player paused the round themselves. A pause the player asked
+     for must outlast the page being hidden and shown again, so returning to the
+     page resumes only a pause the page itself caused. */
+  let pausedByUser = false;
+
   function enterState(nextState) {
     state = nextState;
     applyControls(CONTROLS_BY_STATE[nextState]);
+
+    /* The pause control is only on show while a round is, so its name follows
+       the two states it can be seen in and is left alone otherwise. */
+    if (nextState === RoundState.Running) {
+      setPaused(false);
+    } else if (nextState === RoundState.Paused) {
+      setPaused(true);
+    }
 
     const screen = SCREEN_BY_STATE[nextState];
     if (screen) {
@@ -182,6 +210,7 @@ export function createGameController({
   function beginRound(difficulty) {
     roundId += 1;
     const currentRound = roundId;
+    pausedByUser = false;
 
     /* Cleared before anything new is created, so a restart can never leave a
        second timer, cycle, or background loop running alongside the fresh
@@ -229,10 +258,8 @@ export function createGameController({
   }
 
   function finishRound() {
-    /* The running state is retired first so a hit arriving alongside the final
-       tick cannot still score. */
-    enterState(RoundState.Finished);
-
+    /* The round is torn down first, which hides the mole and stops the clock,
+       so nothing can be scored while the outcome is being prepared. */
     roundTimer.stop();
     moleCycle.stop();
     optional(() => hammer.deactivate());
@@ -242,8 +269,18 @@ export function createGameController({
     /* Only a completed round is recorded, so an abandoned or restarted round
        never reaches the best score. */
     const isNewRecord = bestScoreStore.recordBestScore(activeDifficulty, score);
+    const best = bestScoreStore.readBestScore(activeDifficulty);
     showBestScoreFor(activeDifficulty);
+    setFinalScore(score);
+    setRecordSet(isNewRecord);
+    setGameOverSummary(gameOverSummary(score, best, isNewRecord));
     setStatusMessage(gameOverMessage(score, isNewRecord));
+
+    /* Shown last, once the outcome is in place: this moves to the game-over
+       screen and puts focus on its heading, and the heading announces the
+       summary set just above. Entering the finished state here also closes the
+       board, so any click landing afterwards finds the round already over. */
+    enterState(RoundState.Finished);
     optional(() => audio.playGameOver());
   }
 
@@ -343,31 +380,54 @@ export function createGameController({
     reflectSoundAvailability();
   }
 
-  /* Visibility is the only reason a round pauses, so a paused round is always
-     one waiting for the page to come back. */
+  /* Pausing and resuming are the same two steps whoever asks for them, so the
+     player's Pause control and the page being hidden share one path each. */
+  function pauseRound() {
+    enterState(RoundState.Paused);
+    roundTimer.pause();
+    moleCycle.pause();
+    optional(() => hammer.deactivate());
+    optional(() => audio.stopRoundMusic());
+    setStatusMessage(PAUSED_MESSAGE);
+  }
+
+  function resumeRound() {
+    enterState(RoundState.Running);
+    roundTimer.resume();
+    moleCycle.resume();
+    optional(() => hammer.activate());
+    setStatusMessage(RESUMED_MESSAGE);
+
+    /* The context already exists from the activation that began the round, so
+       continuing the loop needs no new permission. */
+    if (getSoundEnabled()) {
+      optional(() => audio.startRoundMusic());
+    }
+  }
+
+  /* The player's own Pause. It records that the pause was deliberate, so the
+     page returning from the background does not undo it. */
+  function handlePauseToggle() {
+    if (state === RoundState.Running) {
+      pausedByUser = true;
+      pauseRound();
+    } else if (state === RoundState.Paused) {
+      pausedByUser = false;
+      resumeRound();
+    }
+  }
+
+  /* A round pauses on its own when the page is hidden, and comes back when the
+     page does, unless the player had paused it deliberately, in which case it
+     is theirs to resume. */
   function handleVisibilityChange(isHidden) {
     if (isHidden && state === RoundState.Running) {
-      enterState(RoundState.Paused);
-      roundTimer.pause();
-      moleCycle.pause();
-      optional(() => hammer.deactivate());
-      optional(() => audio.stopRoundMusic());
-      setStatusMessage(PAUSED_MESSAGE);
+      pauseRound();
       return;
     }
 
-    if (!isHidden && state === RoundState.Paused) {
-      enterState(RoundState.Running);
-      roundTimer.resume();
-      moleCycle.resume();
-      optional(() => hammer.activate());
-      setStatusMessage(RESUMED_MESSAGE);
-
-      /* The context already exists from the activation that began the round,
-         so continuing the loop needs no new permission. */
-      if (getSoundEnabled()) {
-        optional(() => audio.startRoundMusic());
-      }
+    if (!isHidden && state === RoundState.Paused && !pausedByUser) {
+      resumeRound();
     }
   }
 
@@ -391,6 +451,8 @@ export function createGameController({
 
       onStartGame(handleStartGame);
       onRestartGame(handleRestartGame);
+      onRestartRound(handleRestartGame);
+      onPauseGame(handlePauseToggle);
       onMainMenu(handleMainMenu);
       onHoleActivate(handleHoleActivation);
       onDifficultyChange(handleDifficultyChange);
@@ -403,6 +465,8 @@ export function createGameController({
     disconnect() {
       offStartGame();
       offRestartGame();
+      offRestartRound();
+      offPauseGame();
       offMainMenu();
       offHoleActivate();
       offDifficultyChange();

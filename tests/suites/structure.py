@@ -12,10 +12,11 @@ DESCRIPTION = "semantic markup, accessible names, and live regions"
 # screen, then the board, then the settings, then game over.
 EXPECTED_NAMES = [
     "Start Game", "Settings",
+    "Pause", "Restart",
     "Hole 1", "Hole 2", "Hole 3", "Hole 4", "Hole 5",
     "Hole 6", "Hole 7", "Hole 8", "Hole 9",
     "Back", "Difficulty", "Sound", "Music Volume", "Dark theme",
-    "Restart Game", "Main Menu",
+    "Play Again", "Menu",
 ]
 
 SCREENS = ["screen-title", "screen-game", "screen-settings", "screen-over"]
@@ -88,19 +89,27 @@ def run(browser, url, results):
         True,
     )
 
-    # The readings are a description list, not form output. An output element
-    # maps to role=status, which is an announcing region.
-    results.check("readings are a description list",
-                  browser.eval("document.querySelectorAll('.scoreboard__list').length"), 1)
-    results.check("three terms",
-                  browser.eval("document.querySelectorAll('.scoreboard__list dt').length"), 3)
-    results.check("three definitions",
-                  browser.eval("document.querySelectorAll('.scoreboard__list dd').length"), 3)
+    # The readings are description lists, not form output. An output element
+    # maps to role=status, which is an announcing region, so the score and the
+    # countdown would each be announced on every change.
+    results.check("the heads-up readings are a description list",
+                  browser.eval("document.querySelectorAll('.hud__readings').length"), 1)
     results.check(
-        "the terms name the three readings",
-        browser.eval("[...document.querySelectorAll('.scoreboard__list dt')]"
+        "the heads-up display names the score and the countdown",
+        browser.eval("[...document.querySelectorAll('.hud__readings dt')]"
                      ".map(term => term.textContent.trim())"),
-        ["Score", "Time Remaining", "Best Score"],
+        ["Score", "Time Remaining"],
+    )
+    results.check("the countdown bar is decoration, hidden from assistive technology",
+                  browser.eval("document.querySelector('#time-bar')"
+                               ".getAttribute('aria-hidden')"), "true")
+    results.check("the game over readings are a description list",
+                  browser.eval("document.querySelectorAll('.over__readings').length"), 1)
+    results.check(
+        "game over names the final score and the best score",
+        browser.eval("[...document.querySelectorAll('.over__readings dt')]"
+                     ".map(term => term.textContent.trim())"),
+        ["Final Score", "Best Score"],
     )
     results.check(
         "no output element outside the status region",

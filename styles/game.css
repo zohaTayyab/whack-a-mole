@@ -48,6 +48,10 @@
    clearly enough to be read as its own place. */
 .screen {
   display: grid;
+  /* A single column capped at the container: without the minmax a grid track
+     grows to its widest child's content, which lets a tight row like the
+     heads-up display push the whole screen wider than the viewport. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-sm);
   align-content: start;
 }
@@ -115,33 +119,27 @@
   text-align: start;
 }
 
-/* The board screen puts the readings beside the board once there is room for
-   two columns, rather than stacking them above it. */
-@media (min-width: 60rem) {
-  .screen--game {
-    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
-    grid-template-areas:
-      "heading    board"
-      "scoreboard board"
-      "status     board";
-    align-items: start;
-  }
+/* The game screen is a centred column: the heads-up display, then the board,
+   with the status line between them. Keeping it to one column puts the score
+   and the countdown directly above the board rather than off to one side. */
+.screen--game {
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+}
 
-  .screen--game > .screen__title {
-    grid-area: heading;
-  }
-
-  .scoreboard {
-    grid-area: scoreboard;
-  }
-
-  .status {
-    grid-area: status;
-  }
-
-  .board-panel {
-    grid-area: board;
-  }
+/* The board heading names the screen for assistive technology; the display
+   already reads as the game, so the words are not repeated on screen. */
+.screen__title--game {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Panels */
@@ -159,46 +157,195 @@
   font-size: var(--text-lg);
 }
 
-/* Scoreboard */
+/* Heads-up display */
 
-/* A row per reading, holding the term and its value. Both are allowed to wrap
-   onto separate lines rather than being pinned to columns, which is what keeps
-   the panel readable when the viewport is very narrow or the page is zoomed
-   well past 200%. */
-.scoreboard__item {
+.hud {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-2xs);
-  padding-block: var(--space-2xs);
-  border-block-end: 1px solid var(--color-border);
+  gap: var(--space-2xs) var(--space-sm);
+  /* Lets the display shrink to its grid track so its own children wrap, rather
+     than holding their combined width and overflowing the screen. */
+  min-width: 0;
+  padding: var(--space-2xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.scoreboard__item:last-child {
-  border-block-end: none;
+.hud__readings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2xs) var(--space-md);
+  /* Grows to fill, wraps its own readings onto a second line before it would
+     force the row wider than the screen, and shrinks to nothing so the controls
+     keep their place. */
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.scoreboard__label {
-  color: var(--color-text-muted);
-}
-
-.scoreboard__reading {
+.hud__reading {
   display: flex;
   align-items: baseline;
-  gap: var(--space-3xs);
+  gap: var(--space-2xs);
+  min-width: 0;
 }
 
-.scoreboard__value {
+.hud__reading--time {
+  flex: 1 1 8rem;
+}
+
+.hud__label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.hud__value {
   color: var(--color-accent);
   font-size: var(--text-xl);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
 
-.scoreboard__unit {
+.hud__value--time {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hud__unit {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+/* The countdown bar. Decoration driven from the same value as the number, so
+   it echoes the reading rather than being a second source of it. */
+.time-bar {
+  flex: 1 1 4rem;
+  min-inline-size: 3rem;
+  block-size: 0.5rem;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 999px;
+  background-color: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.time-bar::-webkit-progress-bar {
+  background-color: var(--color-surface-sunken);
+  border-radius: 999px;
+}
+
+.time-bar::-webkit-progress-value {
+  background-color: var(--color-accent);
+  border-radius: 999px;
+}
+
+.time-bar::-moz-progress-bar {
+  background-color: var(--color-accent);
+  border-radius: 999px;
+}
+
+/* Heads-up controls: two icon buttons, so pause and restart stay one tap away
+   without crowding the play surface with words. */
+.hud__controls {
+  display: flex;
+  gap: var(--space-2xs);
+  /* Held to the trailing edge whether the controls share the row with the
+     readings or wrap onto their own line under them. */
+  margin-inline-start: auto;
+}
+
+.button--icon {
+  display: grid;
+  place-items: center;
+  inline-size: var(--target-min);
+  min-inline-size: var(--target-min);
+  padding: 0;
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.button--icon:not(:disabled):hover {
+  background-color: var(--color-surface-sunken);
+}
+
+.icon {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  fill: currentColor;
+}
+
+/* One button, two icons: the pause bars while a round runs, the resume triangle
+   while it is paused. The name changes with them, in the button's own text. */
+.button--icon .icon--resume,
+.button--icon[data-paused="true"] .icon--pause {
+  display: none;
+}
+
+.button--icon[data-paused="true"] .icon--resume {
+  display: block;
+}
+
+/* Game over */
+
+.screen--over {
+  width: 100%;
+  max-width: 30rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.over__readings {
+  display: grid;
+  gap: var(--space-2xs);
+  margin-block: var(--space-2xs);
+}
+
+.over__reading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding-block: var(--space-2xs);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.over__reading:last-child {
+  border-block-end: none;
+}
+
+.over__label {
+  color: var(--color-text-muted);
+}
+
+.over__value {
+  color: var(--color-accent);
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.over__value--final {
+  font-size: var(--text-display);
+  line-height: 1.1;
+}
+
+.over__record {
+  color: var(--color-primary-strong);
+  font-weight: 600;
+}
+
+.controls__actions--over {
+  justify-content: center;
 }
 
 /* Settings */

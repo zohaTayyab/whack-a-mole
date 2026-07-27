@@ -6,8 +6,12 @@ import { DEFAULT_MUSIC_VOLUME, HOLE_COUNT } from "./config.js";
 const SELECTORS = {
   score: "#score",
   timeRemaining: "#time-remaining",
+  timeBar: "#time-bar",
   bestScore: "#best-score",
   titleBestScore: "#title-best-score",
+  finalScore: "#final-score",
+  recordNote: "#record-note",
+  overSummary: "#over-summary",
   difficulty: "#difficulty",
   sound: "#sound",
   musicVolume: "#music-volume",
@@ -15,6 +19,9 @@ const SELECTORS = {
   darkTheme: "#dark-theme",
   startGame: "#start-game",
   restartGame: "#restart-game",
+  restartRound: "#restart-round",
+  pauseGame: "#pause-game",
+  pauseLabel: "#pause-label",
   gameStatus: "#game-status",
   board: "#board",
   hammer: "#hammer",
@@ -61,6 +68,8 @@ let darkThemeListener = null;
 let openSettingsListener = null;
 let closeSettingsListener = null;
 let mainMenuListener = null;
+let restartRoundListener = null;
+let pauseGameListener = null;
 let boardPointerMoveListener = null;
 let boardPointerLeaveListener = null;
 let visibilityListener = null;
@@ -278,13 +287,55 @@ export function setBestScore(score) {
 }
 
 /* Time Remaining is deliberately not a live region: announcing every second
-   would talk over everything else. */
+   would talk over everything else. The bar beside the number is decoration and
+   is driven from the same value, so the two never disagree. */
 export function setTimeRemaining(seconds) {
   if (!elements) {
     return;
   }
 
   elements.timeRemaining.textContent = String(seconds);
+  elements.timeBar.value = seconds;
+}
+
+/* The game-over readings live on their own screen, filled in before it is
+   shown. Final Score is a plain reading; the record note is shown only when a
+   record was set; the summary is what the heading announces as it takes focus,
+   so the outcome is spoken once without a second live region. */
+export function setFinalScore(score) {
+  if (!elements) {
+    return;
+  }
+
+  elements.finalScore.textContent = String(score);
+}
+
+export function setRecordSet(isRecord) {
+  if (!elements) {
+    return;
+  }
+
+  elements.recordNote.hidden = !isRecord;
+}
+
+export function setGameOverSummary(text) {
+  if (!elements) {
+    return;
+  }
+
+  elements.overSummary.textContent = text;
+}
+
+/* The pause control is one button that both pauses and resumes, so its name
+   and its icon follow the state rather than a second control appearing. The
+   name is real text in the button, not an ARIA attribute. */
+export function setPaused(isPaused) {
+  if (!elements) {
+    return;
+  }
+
+  elements.pauseGame.dataset.paused = isPaused ? "true" : "false";
+  elements.pauseLabel.textContent = isPaused ? "Resume" : "Pause";
 }
 
 /* Game Status is a live region, so an unchanged message is left alone to avoid
@@ -433,6 +484,45 @@ export function offMainMenu() {
 
   elements.mainMenu.removeEventListener("click", mainMenuListener);
   mainMenuListener = null;
+}
+
+/* The heads-up Restart: a second way into a fresh round, on the play surface
+   rather than only after game over. It runs the same restart the game already
+   knows, so it holds no logic of its own. */
+export function onRestartRound(handler) {
+  if (!elements || restartRoundListener) {
+    return;
+  }
+
+  restartRoundListener = handler;
+  elements.restartRound.addEventListener("click", restartRoundListener);
+}
+
+export function offRestartRound() {
+  if (!elements || !restartRoundListener) {
+    return;
+  }
+
+  elements.restartRound.removeEventListener("click", restartRoundListener);
+  restartRoundListener = null;
+}
+
+export function onPauseGame(handler) {
+  if (!elements || pauseGameListener) {
+    return;
+  }
+
+  pauseGameListener = handler;
+  elements.pauseGame.addEventListener("click", pauseGameListener);
+}
+
+export function offPauseGame() {
+  if (!elements || !pauseGameListener) {
+    return;
+  }
+
+  elements.pauseGame.removeEventListener("click", pauseGameListener);
+  pauseGameListener = null;
 }
 
 export function onStartGame(handler) {

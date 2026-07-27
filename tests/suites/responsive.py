@@ -83,6 +83,27 @@ def run(browser, url, results):
         results.ok("{}: the board has room to be played".format(label),
                    board["width"] >= 200)
 
+        # The heads-up display is only on show during a round, so its overflow
+        # would slip past a check made on the title screen. The tight row of
+        # score, countdown, and controls is exactly what could push the play
+        # screen wider than the viewport, so it is measured here with the round
+        # under way.
+        play = browser.eval("""
+          (() => {
+            const doc = document.documentElement;
+            return {
+              scrollWidth: doc.scrollWidth,
+              clientWidth: doc.clientWidth,
+              widest: [...document.querySelectorAll('#screen-game *')]
+                .reduce((widest, el) => Math.max(widest, el.getBoundingClientRect().right), 0),
+            };
+          })()
+        """)
+        results.ok("{}: the play screen does not scroll sideways".format(label),
+                   play["scrollWidth"] <= play["clientWidth"] + 1)
+        results.ok("{}: nothing on the play screen reaches past the viewport".format(label),
+                   play["widest"] <= play["clientWidth"] + 1)
+
         # A checkbox sits inside its label, so the label is the target: the
         # whole row activates the control, not only the 22px box. Measuring the
         # box alone would measure something the player never has to hit.

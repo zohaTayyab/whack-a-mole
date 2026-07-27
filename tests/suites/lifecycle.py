@@ -70,7 +70,7 @@ def run(browser, url, results):
     results.ok("finished: the status reports the round is over",
                finished["status"].startswith("Game over. Final score:"))
     results.ok("finished: the status says how to play again",
-               "Restart Game" in finished["status"])
+               "Play Again" in finished["status"])
 
     # A finished round must stay finished: no mole may appear afterwards.
     time.sleep(1.0)
@@ -85,3 +85,30 @@ def run(browser, url, results):
     results.check("restart: the full round is back", restarted["time"], 60)
     results.check("restart: the board is live", restarted["holesEnabled"], 9)
     results.check("restart: difficulty locks again", restarted["difficultyEnabled"], False)
+
+    # The player's own Pause control, distinct from the page being hidden.
+    browser.eval("document.querySelector('#pause-game').click()")
+    time.sleep(0.2)
+    user_paused = game.control_state(browser)
+    results.check("pause: the round pauses on request", user_paused["status"], "Game paused.")
+    results.check("pause: the board is closed", user_paused["holesEnabled"], 0)
+    results.check("pause: the control now offers to resume",
+                  browser.eval("document.querySelector('#pause-label').textContent"),
+                  "Resume")
+
+    # A pause the player asked for must outlast the page being hidden and shown.
+    game.set_visibility(browser, True)
+    game.set_visibility(browser, False)
+    still_paused = game.control_state(browser)
+    results.check("pause: an explicit pause survives leaving and returning",
+                  still_paused["status"], "Game paused.")
+    results.check("pause: and the board stays closed", still_paused["holesEnabled"], 0)
+
+    browser.eval("document.querySelector('#pause-game').click()")
+    time.sleep(0.2)
+    user_resumed = game.control_state(browser)
+    results.check("pause: pressing it again resumes", user_resumed["status"], "Game resumed.")
+    results.check("pause: the board is live again", user_resumed["holesEnabled"], 9)
+    results.check("pause: the control offers to pause once more",
+                  browser.eval("document.querySelector('#pause-label').textContent"),
+                  "Pause")

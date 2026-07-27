@@ -34,9 +34,9 @@
           board, and each one you hit before it disappears adds to your score.
         </p>
         <!-- The best score for the selected difficulty, shown on the way in as
-             the target to beat. It mirrors the scoreboard reading on the game
-             screen; it is a plain reading, not a live region, so consulting it
-             here announces nothing. -->
+             the target to beat. It mirrors the best-score reading on the game
+             over screen; it is a plain reading, not a live region, so consulting
+             it here announces nothing. -->
         <p class="title-best">
           Best Score
           <span class="title-best__value" id="title-best-score">0</span>
@@ -78,41 +78,66 @@
         id="screen-game"
         aria-labelledby="game-heading"
       >
-        <h2 class="screen__title" id="game-heading" tabindex="-1">Game Board</h2>
+        <h2 class="screen__title screen__title--game" id="game-heading" tabindex="-1">
+          Game Board
+        </h2>
 
-        <section class="panel scoreboard" aria-labelledby="scoreboard-heading">
-          <h3 class="panel__title" id="scoreboard-heading">Scoreboard</h3>
-          <!-- A description list, not output elements: output is exposed as a
-               status region, so the score, the countdown, and the best score
-               would each be announced on every change and the countdown would
-               interrupt every second. These are readings to consult, not
-               announcements, and the term-and-value pairing labels each one
-               without an ARIA attribute. The div around each pair is the
-               grouping the specification defines for exactly this purpose: it
-               is what lets a reading stay one row, ruled by one line, and wrap
-               to two on a narrow screen. -->
-          <dl class="scoreboard__list">
-            <div class="scoreboard__item">
-              <dt class="scoreboard__label">Score</dt>
-              <dd class="scoreboard__reading">
-                <span class="scoreboard__value" id="score">0</span>
-              </dd>
+        <!-- The heads-up display sits on the play surface, where the player is
+             already looking. Score and the countdown are readings in a
+             description list rather than output elements: output is exposed as a
+             status region and would announce every change, and the countdown
+             interrupting every second is the exact thing that must not happen.
+             The term-and-value pairing names each reading without an ARIA
+             attribute. -->
+        <div class="hud">
+          <dl class="hud__readings">
+            <div class="hud__reading">
+              <dt class="hud__label">Score</dt>
+              <dd class="hud__value" id="score">0</dd>
             </div>
-            <div class="scoreboard__item">
-              <dt class="scoreboard__label">Time Remaining</dt>
-              <dd class="scoreboard__reading">
-                <span class="scoreboard__value" id="time-remaining">60</span>
-                <span class="scoreboard__unit">seconds</span>
-              </dd>
-            </div>
-            <div class="scoreboard__item">
-              <dt class="scoreboard__label">Best Score</dt>
-              <dd class="scoreboard__reading">
-                <span class="scoreboard__value" id="best-score">0</span>
+            <div class="hud__reading hud__reading--time">
+              <dt class="hud__label">Time Remaining</dt>
+              <dd class="hud__value hud__value--time">
+                <!-- Decoration: the number beside it carries the reading, so the
+                     bar is hidden from assistive technology rather than
+                     announcing a countdown the game keeps quiet. -->
+                <progress
+                  class="time-bar"
+                  id="time-bar"
+                  max="60"
+                  value="60"
+                  aria-hidden="true"
+                ></progress>
+                <span id="time-remaining">60</span><span class="hud__unit">s</span>
               </dd>
             </div>
           </dl>
-        </section>
+          <div class="hud__controls">
+            <button
+              class="button button--icon"
+              type="button"
+              id="pause-game"
+              data-paused="false"
+            >
+              <svg class="icon icon--pause" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="6" y="5" width="4" height="14" rx="1" />
+                <rect x="14" y="5" width="4" height="14" rx="1" />
+              </svg>
+              <svg class="icon icon--resume" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5l11 7-11 7z" />
+              </svg>
+              <span class="visually-hidden" id="pause-label">Pause</span>
+            </button>
+            <button class="button button--icon" type="button" id="restart-round">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"
+                />
+              </svg>
+              <span class="visually-hidden">Restart</span>
+            </button>
+          </div>
+        </div>
 
         <section class="panel status" aria-labelledby="status-heading">
           <h3 class="panel__title" id="status-heading">Game Status</h3>
@@ -256,20 +281,48 @@
         id="screen-over"
         aria-labelledby="over-heading"
       >
-        <h2 class="screen__title" id="over-heading" tabindex="-1">Game Over</h2>
-        <p class="controls__actions">
+        <!-- The heading is where focus lands when this screen opens, so it is
+             what announces game over. Its description carries the outcome, so
+             the one announcement names the final score and any record without a
+             second live region. -->
+        <h2
+          class="screen__title"
+          id="over-heading"
+          tabindex="-1"
+          aria-describedby="over-summary"
+        >
+          Game Over
+        </h2>
+
+        <dl class="over__readings">
+          <div class="over__reading">
+            <dt class="over__label">Final Score</dt>
+            <dd class="over__value over__value--final" id="final-score">0</dd>
+          </div>
+          <div class="over__reading">
+            <dt class="over__label">Best Score</dt>
+            <dd class="over__value" id="best-score">0</dd>
+          </div>
+        </dl>
+        <p class="over__record" id="record-note" hidden>New best score</p>
+
+        <p class="controls__actions controls__actions--over">
           <button
-            class="button button--primary"
+            class="button button--primary button--large"
             type="button"
             id="restart-game"
             disabled
           >
-            Restart Game
+            Play Again
           </button>
           <button class="button button--secondary" type="button" id="main-menu">
-            Main Menu
+            Menu
           </button>
         </p>
+
+        <!-- Filled in when the round ends, before this screen is shown, so the
+             heading it describes announces the outcome as it takes focus. -->
+        <span class="visually-hidden" id="over-summary"></span>
       </section>
     </main>
 

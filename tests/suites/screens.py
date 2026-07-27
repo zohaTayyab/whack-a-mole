@@ -92,8 +92,10 @@ def run(browser, url, results):
     results.check("starting a round shows the board", visible(browser), "screen-game")
     results.check("and focus moves to the board heading",
                   browser.eval("document.activeElement.id"), "game-heading")
-    results.check("and the board is what can be reached",
-                  browser.eval(REACHABLE)[0].startswith("Hole"), True)
+    reachable = browser.eval(REACHABLE)
+    results.check("the heads-up controls lead the game screen",
+                  reachable[:2], ["pause-game", "restart-round"])
+    results.check("and the board follows", reachable[2].startswith("Hole"), True)
 
     game.set_visibility(browser, True)
     results.check("pausing stays on the board", visible(browser), "screen-game")
@@ -166,7 +168,7 @@ def run(browser, url, results):
 
     # The title screen shows the best score for the selected difficulty as the
     # score to beat. A round played to the end should leave it there on the way
-    # back, in step with the scoreboard reading it mirrors.
+    # back, in step with the best-score reading it mirrors.
     game.start_round(browser)
     for _ in range(4):
         if game.wait_for_mole(browser) >= 0:
@@ -179,8 +181,17 @@ def run(browser, url, results):
             """)
         time.sleep(0.15)
     results.ok("a scoring round reaches game over", game.wait_for_game_over(browser))
-    recorded = game.control_state(browser)["best"]
+    over = game.control_state(browser)
+    recorded = over["best"]
     results.at_least("the round set a best score to show", recorded, 1)
+    results.check("game over shows the final score",
+                  browser.eval("document.querySelector('#final-score').textContent"),
+                  str(over["score"]))
+    results.check("game over shows the best score",
+                  browser.eval("document.querySelector('#best-score').textContent"),
+                  str(recorded))
+    results.check("game over notes a record when one was set",
+                  browser.eval("document.querySelector('#record-note').hidden"), False)
     browser.eval("document.querySelector('#main-menu').click()")
     time.sleep(0.35)
     results.check("the title screen shows the best score to beat",
