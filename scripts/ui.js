@@ -59,6 +59,15 @@ const MOLE_VISIBLE_NAME_SUFFIX = ", mole visible";
 const LOW_TIME_SECONDS = 10;
 const CRITICAL_TIME_SECONDS = 5;
 
+/* Sparks thrown off by a hit, one per fixed direction, so the burst has some
+   colour and life without any randomness. */
+const SPARK_COUNT = 6;
+
+/* Confetti at game over, and how long its layer lives before it is removed. The
+   fall runs longer than a hit's feedback, so it keeps its own timing. */
+const CONFETTI_COUNT = 16;
+const CONFETTI_CLEANUP_MS = 1800;
+
 /* How long a hit's floating reward and impact linger before they are removed.
    It is only a safety net: each element is normally removed the moment its
    animation ends, and this clears it even where no animation runs, such as
@@ -304,6 +313,31 @@ export function showHitFeedback(holeIndex) {
 
   spawnTransient(hole, "score-float", "+1");
   spawnTransient(hole, "hit-burst");
+  for (let point = 0; point < SPARK_COUNT; point += 1) {
+    spawnTransient(hole, `spark spark--${point}`);
+  }
+}
+
+/* The game-over flourish: a short fall of confetti over the outcome screen,
+   spawned only when a record is set. The pieces are decoration — hidden from
+   assistive technology, taking no pointer events — and their positions and
+   colours are all set in CSS, so nothing here carries an inline style. The whole
+   layer is removed once the fall is done; under reduced motion the pieces never
+   travel, so it resolves to nothing seen. */
+export function celebrate() {
+  if (!elements) {
+    return;
+  }
+
+  const layer = document.createElement("div");
+  layer.className = "confetti";
+  layer.setAttribute("aria-hidden", "true");
+  for (let piece = 0; piece < CONFETTI_COUNT; piece += 1) {
+    layer.appendChild(document.createElement("span")).className = "confetti__piece";
+  }
+
+  elements.screenOver.appendChild(layer);
+  setTimeout(() => layer.remove(), CONFETTI_CLEANUP_MS);
 }
 
 /* Replays a one-shot animation by clearing its trigger, forcing a reflow so the

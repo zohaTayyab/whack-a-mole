@@ -31,7 +31,6 @@ def run(browser, url, results):
     results.check("document language", browser.eval("document.documentElement.lang"), "en")
     results.check("one main landmark", browser.eval("document.querySelectorAll('main').length"), 1)
     results.check("one banner", browser.eval("document.querySelectorAll('header').length"), 1)
-    results.check("one footer", browser.eval("document.querySelectorAll('footer').length"), 1)
     results.check("nine holes", browser.eval("document.querySelectorAll('.hole').length"), 9)
 
     results.check("one h1", browser.eval("document.querySelectorAll('h1').length"), 1)

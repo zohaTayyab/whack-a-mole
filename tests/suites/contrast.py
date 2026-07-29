@@ -97,7 +97,6 @@ def run(browser, url, results):
         text(browser, results, scheme, "#open-settings", "the Settings button label", NORMAL_TEXT)
         text(browser, results, scheme, ".instructions__list", "the instructions", NORMAL_TEXT)
         text(browser, results, scheme, ".page-title", "the wordmark", LARGE_TEXT)
-        text(browser, results, scheme, ".page-footer p", "the footer", NORMAL_TEXT)
 
         # The focus ring has to stand out from what is behind the control it
         # rings. It is drawn by :focus-visible, which only a keyboard focus

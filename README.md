@@ -33,9 +33,11 @@ Cross-browser checks and deployment are Milestone 13, which has not been carried
   screen titles are display lettering built from layered strokes and shadows on real text — no font file and no
   external request — and every piece of text sits on a plaque or scrim rather than directly on the illustration.
 - **Motion.** One shared set of timings and one easing curve drive every animation: screens fade in as their
-  content rises, buttons lift on hover and sink on press, the score pops with a floating "+1" from the struck
-  hole, a ring flashes on a hit, the countdown turns urgent in its final seconds, and the game over screen
-  celebrates the result. Every one has a reduced-motion form that keeps the feedback and drops the travel.
+  content rises, buttons lift on hover and sink on press, the score pops with a floating "+1" and a burst of
+  sparks from the struck hole, a ring flashes on a hit, the countdown turns urgent in its final seconds, and a
+  new best score is met with a short fall of confetti. Every one has a reduced-motion form that keeps the
+  feedback and drops the travel; the purely decorative flourishes — the sparks and the confetti — simply do not
+  play when motion is reduced.
 - **Screens.** The game is four screens — title, game, settings, and game over — shown one at a time on a
   full-screen stage. The title screen leads with the best score and a large Play control; settings gathers
   difficulty, sound, music volume, and theme as a stacked menu; game over reports the outcome. The round itself
@@ -152,7 +154,7 @@ Nothing is installed and nothing is downloaded. The runner needs Python 3, plus 
 browser suites and any engine that loads ES modules for the module suite; where one is missing, those suites are
 reported as skipped rather than counted as passing. See [tests/README.md](tests/README.md).
 
-There are 558 checks across thirteen suites, covering markup and accessible names, the round lifecycle, scoring by
+There are 555 checks across thirteen suites, covering markup and accessible names, the round lifecycle, scoring by
 mouse, keyboard and touch, difficulty, persistence, audio, themes, colour contrast measured against the WCAG
 thresholds, the hammer, the screen flow, responsive layout, and the awkward cases such as returning through the
 back/forward cache.

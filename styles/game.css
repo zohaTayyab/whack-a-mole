@@ -1,8 +1,7 @@
 /* Layout and presentation for the Whack-a-Mole interface. */
 
 .page-header,
-.stage,
-.page-footer {
+.stage {
   width: min(100% - (2 * var(--space-sm)), 64rem);
   margin-inline: auto;
 }
@@ -65,19 +64,23 @@
    selectable text. */
 .page-title {
   font-size: var(--text-display);
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.015em;
   color: var(--color-display-fill);
+  /* A thicker layered outline than the screen titles, so the wordmark reads as
+     the chunky, playful hero of the page. Still real text: strokes and shadows
+     only, nothing rasterised. */
   text-shadow:
-    0 -2px 0 var(--color-display-edge),
-    0 2px 0 var(--color-display-edge),
-    -2px 0 0 var(--color-display-edge),
-    2px 0 0 var(--color-display-edge),
-    -1.5px -1.5px 0 var(--color-display-edge),
-    1.5px -1.5px 0 var(--color-display-edge),
-    -1.5px 1.5px 0 var(--color-display-edge),
-    1.5px 1.5px 0 var(--color-display-edge),
-    0 -1px 0 var(--color-display-highlight),
-    0 7px 12px var(--color-display-cast);
+    0 -3px 0 var(--color-display-edge),
+    0 3px 0 var(--color-display-edge),
+    -3px 0 0 var(--color-display-edge),
+    3px 0 0 var(--color-display-edge),
+    -2px -2px 0 var(--color-display-edge),
+    2px -2px 0 var(--color-display-edge),
+    -2px 2px 0 var(--color-display-edge),
+    2px 2px 0 var(--color-display-edge),
+    0 -2px 0 var(--color-display-highlight),
+    0 9px 16px var(--color-display-cast);
 }
 
 /* Measured rather than full width, so a line stays comfortable to read. It is
@@ -97,8 +100,8 @@
   font-size: var(--text-lg);
 }
 
-/* The stage holds the header and the footer in place and gives the rest of the
-   height to the one screen on show, so the screen has a definite height to work
+/* The stage holds the header in place and gives the rest of the height to the
+   one screen on show, so the screen has a definite height to work
    within and the board can be sized to what is left rather than pushing the
    page taller than the viewport. If a screen still cannot fit, it scrolls here
    rather than moving the whole page. Containing the overscroll stops a swipe
@@ -213,17 +216,27 @@
    backing over the scenery. */
 .title-best {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   gap: var(--space-2xs);
   width: fit-content;
   margin-inline: auto;
-  padding: var(--space-3xs) var(--space-sm);
+  padding: var(--space-3xs) var(--space-md);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   box-shadow: var(--elevation-1);
   color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* The star marks the badge as the target to beat. Decorative, so it is drawn in
+   the bright pop colour and hidden from assistive technology. */
+.title-best__star {
+  inline-size: 1.2em;
+  block-size: 1.2em;
+  fill: var(--color-pop);
+  flex: none;
 }
 
 .title-best__value {
@@ -383,7 +396,8 @@
   color: var(--color-accent);
   font-size: var(--text-xl);
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .hud__value--time {
@@ -405,12 +419,13 @@
 .time-bar {
   flex: 1 1 4rem;
   min-inline-size: 3rem;
-  block-size: 0.5rem;
+  block-size: 0.7rem;
   appearance: none;
   -webkit-appearance: none;
   border: none;
   border-radius: var(--radius-pill);
   background-color: var(--color-surface-sunken);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.18);
   overflow: hidden;
 }
 
@@ -528,10 +543,75 @@
 /* Game over */
 
 .screen--over {
+  position: relative;
   width: 100%;
   max-width: 30rem;
   margin-inline: auto;
   text-align: center;
+}
+
+/* The confetti layer covers the outcome screen and clips its own pieces, so it
+   adds no scroll and takes no pointer events. */
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti__piece {
+  position: absolute;
+  top: -10%;
+  inline-size: 0.55rem;
+  block-size: 0.85rem;
+  border-radius: 1px;
+  background-color: var(--color-pop);
+  animation: confetti-fall 1.5s var(--motion-ease) forwards;
+}
+
+.confetti__piece:nth-child(4n + 2) {
+  background-color: var(--color-pop-alt);
+}
+.confetti__piece:nth-child(4n + 3) {
+  background-color: var(--color-primary);
+}
+.confetti__piece:nth-child(4n) {
+  background-color: var(--color-accent);
+}
+
+.confetti__piece:nth-child(1) { left: 6%; animation-delay: 0ms; }
+.confetti__piece:nth-child(2) { left: 14%; animation-delay: 120ms; }
+.confetti__piece:nth-child(3) { left: 22%; animation-delay: 40ms; }
+.confetti__piece:nth-child(4) { left: 30%; animation-delay: 220ms; }
+.confetti__piece:nth-child(5) { left: 38%; animation-delay: 80ms; }
+.confetti__piece:nth-child(6) { left: 46%; animation-delay: 300ms; }
+.confetti__piece:nth-child(7) { left: 54%; animation-delay: 20ms; }
+.confetti__piece:nth-child(8) { left: 62%; animation-delay: 180ms; }
+.confetti__piece:nth-child(9) { left: 70%; animation-delay: 60ms; }
+.confetti__piece:nth-child(10) { left: 78%; animation-delay: 260ms; }
+.confetti__piece:nth-child(11) { left: 86%; animation-delay: 100ms; }
+.confetti__piece:nth-child(12) { left: 94%; animation-delay: 200ms; }
+.confetti__piece:nth-child(13) { left: 18%; animation-delay: 340ms; }
+.confetti__piece:nth-child(14) { left: 42%; animation-delay: 150ms; }
+.confetti__piece:nth-child(15) { left: 66%; animation-delay: 360ms; }
+.confetti__piece:nth-child(16) { left: 82%; animation-delay: 300ms; }
+
+.confetti__piece:nth-child(odd) {
+  border-radius: 50%;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-1rem) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(22rem) rotate(560deg);
+  }
 }
 
 /* A plaque holding the game-over readings, so the final and best scores keep an
@@ -735,10 +815,10 @@
 
 .button {
   min-height: var(--target-min);
-  padding-inline: var(--space-sm);
+  padding-inline: var(--space-md);
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  font-weight: 600;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
   transition: background-color var(--motion-duration) ease,
     border-color var(--motion-duration) ease,
     box-shadow var(--motion-duration) ease,
@@ -747,16 +827,42 @@
 
 /* The one control the title screen is built around, so it is given more height
    and a larger label than the secondary actions beside it. */
+/* Text buttons lay their label out in a row so an optional leading icon sits
+   beside it; the icon-only controls keep their own grid centring. */
+.button:not(.button--icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+}
+
+.button__icon {
+  inline-size: 1.2em;
+  block-size: 1.2em;
+  fill: currentColor;
+  flex: none;
+}
+
 .button--large {
-  min-height: 3.25rem;
-  padding-inline: var(--space-lg);
+  min-height: 3.5rem;
+  padding-inline: var(--space-xl);
   font-size: var(--text-lg);
 }
 
+/* The primary control carries a soft top-to-bottom sheen over its fill, so it
+   reads as a rounded, tactile button rather than a flat block. The overlay is a
+   single restrained gradient, and the solid fill token underneath is what the
+   label's contrast is measured against. */
 .button--primary {
   background-color: var(--color-primary);
+  background-image: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.18),
+    rgb(255 255 255 / 0) 45%,
+    rgb(0 0 0 / 0.1)
+  );
   color: var(--color-on-primary);
-  box-shadow: var(--elevation-1);
+  box-shadow: var(--elevation-2);
 }
 
 .button--primary:not(:disabled):hover {
@@ -882,6 +988,7 @@
   --color-mole: light-dark(#9a7350, #9c7452);
   --color-mole-edge: light-dark(#402f22, #2a1d13);
   --color-mole-face: light-dark(#f4ece0, #f8f2e7);
+  --color-mole-cheek: light-dark(#e08a72, #d98a70);
 }
 
 /* The sprite sheet holds the drawing and is never seen in its own right. */
@@ -902,11 +1009,14 @@
    into the dark of the hole rather than ending on a hard line. */
 .mole {
   position: absolute;
-  inset: -10% 11% 40% 11%;
+  /* The top reaches well above the hole so the ears clear it once the mole is
+     up; the overflow clips only what is still below the ground line, and the
+     bottom of the mask fades the base into the dark of the opening. */
+  inset: -34% 11% 40% 11%;
   overflow: hidden;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 88%, transparent);
-  mask-image: linear-gradient(to bottom, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 90%, transparent);
+  mask-image: linear-gradient(to bottom, #000 90%, transparent);
 }
 
 /* The drawing sits on the floor of the well and, at rest, is pushed down so
@@ -950,6 +1060,15 @@
 
 .mole__shine {
   fill: var(--color-mole-face);
+}
+
+.mole__shine--dim {
+  opacity: 0.55;
+}
+
+.mole__cheek {
+  fill: var(--color-mole-cheek);
+  opacity: 0.6;
 }
 
 .mole__whisker {
@@ -1048,6 +1167,64 @@
   100% {
     opacity: 0;
     transform: scale(1.3);
+  }
+}
+
+/* Sparks fly out from the hit in six fixed directions, alternating the two pop
+   colours. Each is centred on the opening by its own negative margin, so the
+   animation only has to carry it outward — no per-element inline position. */
+.spark {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: -0.25rem;
+  border-radius: 50%;
+  background-color: var(--color-pop);
+  pointer-events: none;
+  animation: spark-fly var(--motion-duration-slow) var(--motion-ease) forwards;
+}
+
+.spark--1,
+.spark--3,
+.spark--5 {
+  background-color: var(--color-pop-alt);
+}
+
+.spark--0 {
+  --spark-x: 0rem;
+  --spark-y: -2.7rem;
+}
+.spark--1 {
+  --spark-x: 2.35rem;
+  --spark-y: -1.35rem;
+}
+.spark--2 {
+  --spark-x: 2.35rem;
+  --spark-y: 1.35rem;
+}
+.spark--3 {
+  --spark-x: 0rem;
+  --spark-y: 2.7rem;
+}
+.spark--4 {
+  --spark-x: -2.35rem;
+  --spark-y: 1.35rem;
+}
+.spark--5 {
+  --spark-x: -2.35rem;
+  --spark-y: -1.35rem;
+}
+
+@keyframes spark-fly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--spark-x, 0), var(--spark-y, 0)) scale(1.1);
   }
 }
 
@@ -1275,6 +1452,17 @@
     opacity: 0.85;
     transform: none;
   }
+
+  /* The sparks and the confetti are pure flourish with no static feedback to
+     preserve; the record is already carried by the badge, so they simply do not
+     show when motion is reduced. */
+  .spark {
+    display: none;
+  }
+
+  .confetti {
+    display: none;
+  }
 }
 
 /* Instructions */
@@ -1286,34 +1474,11 @@
   color: var(--color-text-muted);
 }
 
-/* Footer. Over the scenery the credit sits on its own plaque rather than a rule
-   drawn across the hills. */
-.page-footer {
-  padding-block: var(--space-sm);
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  text-align: center;
-}
-
-.page-footer p {
-  display: inline-block;
-  max-width: 100%;
-  padding: var(--space-3xs) var(--space-sm);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--elevation-1);
-}
-
 /* Short viewports — small phones, landscape, small windows, high zoom — give
-   the shell chrome back to the board: the footer steps aside and the header
-   slims to a title bar, so the play area keeps the height it needs. */
+   the shell chrome back to the board: the header slims to a title bar, so the
+   play area keeps the height it needs. */
 @media (max-height: 36rem) {
   .page-header {
     padding-block: var(--space-2xs);
-  }
-
-  .page-footer {
-    display: none;
   }
 }

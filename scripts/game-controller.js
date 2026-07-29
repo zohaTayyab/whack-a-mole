@@ -12,6 +12,7 @@ import {
 import { Screen } from "./screen-controller.js";
 import {
   applyControls,
+  celebrate,
   getMusicVolume,
   getSelectedDifficulty,
   getSoundEnabled,
@@ -282,6 +283,9 @@ export function createGameController({
        summary set just above. Entering the finished state here also closes the
        board, so any click landing afterwards finds the round already over. */
     enterState(RoundState.Finished);
+    if (isNewRecord) {
+      celebrate();
+    }
     optional(() => audio.playGameOver());
   }
 

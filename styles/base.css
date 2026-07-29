@@ -33,6 +33,10 @@
   /* Used only for the last seconds of the countdown, so the urgency reads at a
      glance without relying on the pulse alone. */
   --color-danger: light-dark(#b23124, #f0968b);
+  /* A bright, celebratory accent for decoration only — the sparkles on a hit and
+     the confetti at game over. Never carries text, so it is free to be vivid. */
+  --color-pop: light-dark(#f4a520, #ffcf6c);
+  --color-pop-alt: light-dark(#e5623b, #ff9d6b);
 
   /* Display lettering. A fill, an edge for the layered outline, a highlight for
      the raised top, and a cast for the drop shadow — a day and a night value
@@ -61,7 +65,8 @@
   --text-base: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.5rem;
-  --text-display: clamp(2rem, 1.4rem + 2.6vw, 3rem);
+  --text-2xl: 1.875rem;
+  --text-display: clamp(2.4rem, 1.5rem + 3.8vw, 4.25rem);
 
   /* Spacing scale */
   --space-3xs: 0.25rem;
@@ -73,11 +78,13 @@
   --space-xl: 3rem;
 
   /* Shape: a deliberate radius scale, tightest for inset controls and widest
-     for the plaques that sit over the scenery, plus a full pill for the bar. */
-  --radius-xs: 0.25rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1.25rem;
+     for the plaques that sit over the scenery, plus a full pill for the bar.
+     Rounder than a utilitarian set, so the surfaces read as friendly plaques. */
+  --radius-xs: 0.35rem;
+  --radius-sm: 0.6rem;
+  --radius-md: 0.95rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
   --radius-pill: 999px;
 
   /* Elevation: a three-step scale of layered shadows rather than one hairline,
@@ -154,7 +161,7 @@ body {
   block-size: 100vh;
   block-size: 100dvh;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   padding-block: env(safe-area-inset-top) env(safe-area-inset-bottom);
   padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
