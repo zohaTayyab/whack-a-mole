@@ -7,22 +7,35 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 11 (application shell and screen flow) is complete. The game is organised into four screens — title,
-game, settings, and game over — shown one at a time on a full-screen stage. Focus moves to a screen's heading as
-it opens, and Escape leaves the settings screen. A round lasts 60 seconds at every difficulty. Moles appear in
-random holes, one at a time, and hitting the visible mole with a mouse, a touch screen, or the keyboard adds one
-point; each mole counts at most once. During play a heads-up display shows the score and a countdown bar with the
-seconds beside it, and two icon controls pause or restart the round. When the countdown reaches zero the round
-ends on the game-over screen, which reports the final score and the best score and notes whether a record was set,
-with Play Again and Menu. The board is sized to fit the screen in portrait and landscape, from small phones to
-desktops. Backgrounding the page pauses the round and returns to it with the same remaining time; leaving and
-returning with the browser's Back button restores it ready to play.
+Milestone 12 (visual identity and animation) is complete. The game is organised into four screens — title,
+game, settings, and game over — shown one at a time on a full-screen stage, set against hand-drawn scenery that
+shifts from day to night with the theme. Focus moves to a screen's heading as it opens, and Escape leaves the
+settings screen. A round lasts 60 seconds at every difficulty. Moles appear in random holes, one at a time, and
+hitting the visible mole with a mouse, a touch screen, or the keyboard adds one point; each mole counts at most
+once. The board is a turf field of raised mounds, and a character mole climbs out of the struck hole while an SVG
+mallet swings for the attempt. During play a heads-up display shows the score and a countdown bar with the seconds
+beside it, and two icon controls pause or restart the round. A shared motion system carries the screen changes,
+the button lift and press, a score pop with a floating "+1", a hit ring, the countdown turning urgent in its last
+seconds, and a game-over celebration — each with a reduced-motion form that keeps the feedback and drops the
+travel. When the countdown reaches zero the round ends on the game-over screen, which reports the final score and
+the best score and notes whether a record was set, with Play Again and Menu. The board is sized to fit the screen
+in portrait and landscape, from small phones to desktops. Backgrounding the page pauses the round and returns to
+it with the same remaining time; leaving and returning with the browser's Back button restores it ready to play.
 
-The visual identity and animation are Milestone 12, and cross-browser checks and deployment are Milestone 13.
-Neither has been carried out yet.
+Cross-browser checks and deployment are Milestone 13, which has not been carried out yet.
 
 ## Features
 
+- **Illustrated identity.** The stage sits over hand-authored SVG scenery — a sky, a sun that becomes a moon, and
+  rolling hills — with a day and a night variant that follows the theme. The board is a mown turf field of raised
+  mounds, each opening a real recess with a lit rim and inner shadow. The mole is a drawn character with ears, a
+  muzzle, and whiskers that climbs out of the struck hole, and the hammer is an SVG mallet. The wordmark and the
+  screen titles are display lettering built from layered strokes and shadows on real text — no font file and no
+  external request — and every piece of text sits on a plaque or scrim rather than directly on the illustration.
+- **Motion.** One shared set of timings and one easing curve drive every animation: screens fade in as their
+  content rises, buttons lift on hover and sink on press, the score pops with a floating "+1" from the struck
+  hole, a ring flashes on a hit, the countdown turns urgent in its final seconds, and the game over screen
+  celebrates the result. Every one has a reduced-motion form that keeps the feedback and drops the travel.
 - **Screens.** The game is four screens — title, game, settings, and game over — shown one at a time on a
   full-screen stage. The title screen leads with the best score and a large Play control; settings gathers
   difficulty, sound, music volume, and theme as a stacked menu; game over reports the outcome. The round itself
@@ -81,10 +94,14 @@ Neither has been carried out yet.
   label, so the whole row is one target rather than the small box alone.
 - **Never colour alone.** A mole is distinguished by shape and size as well as by fill, and every state the game
   reports is also written out in words.
-- **Reduced motion.** Where reduced motion is preferred, transitions collapse to nothing and the hammer's swing
-  becomes a still strike, so the feedback survives without the movement.
-- **Decoration stays decoration.** The hammer is hidden from assistive technology, takes no pointer events, is
-  not in the tab order, and can neither change a hole's name nor affect the score.
+- **Reduced motion.** Where reduced motion is preferred, every animation keeps its feedback and drops its travel:
+  transitions collapse, the mole and the game-over readings simply appear, the hammer's swing becomes a still
+  strike, the floating "+1" and the hit ring hold in place instead of sliding and fading, and the countdown keeps
+  its urgent colour without the pulse.
+- **Decoration stays decoration.** The hammer, the scenery, the floating "+1", and the hit ring are hidden from
+  assistive technology, take no pointer events, and are not in the tab order; none can change a hole's name or
+  affect the score. The countdown's urgency is a colour and a pulse only — the reading it accompanies is still not
+  a live region, so the last seconds are not announced.
 
 Testing is described under [Testing](#testing) below, including which checks could not be carried out.
 
@@ -151,8 +168,15 @@ Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
 - Layout at 320, 375, 390, 768, 1024, 1280, and 1440 CSS pixels wide, in portrait and landscape, and at 200%
   zoom, with the board fitting on screen without scrolling in each.
 - Colour contrast across every screen in both themes, computed from the colours the browser resolves and asserted
-  against the WCAG AA thresholds rather than fixed values.
-- Reduced-motion behaviour.
+  against the WCAG AA thresholds rather than fixed values. Every pair clears its threshold in both variants, the
+  tightest being the hole opening against the surrounding turf at 3.88:1 in day and 3.09:1 at night against a
+  3:1 requirement.
+- Reduced-motion behaviour: the suite confirms the interface transitions collapse and the hammer's swing is
+  stilled, and each remaining animation was inspected under the reduced-motion media condition to confirm it lands
+  on its end state — the floating "+1" and the hit ring hold in place rather than resolving to nothing.
+- The illustrated scenery, turf board, mole, and mallet, and the motion feedback — the score pop, floating "+1",
+  hit ring, countdown urgency, and game-over celebration — inspected in both themes at the states where they
+  occur.
 - Round lifecycle, scoring, timing, difficulty, persistence, audio, themes, volume, the hammer, and the player's
   Pause control.
 - Behaviour when storage is denied or holds corrupt data, and when the browser refuses to create audio.
@@ -182,7 +206,7 @@ Cross-browser and device testing belongs to Milestone 13.
 - [x] **Milestone 10 — Accessibility and edge cases.** Labels, focus states, announcements, reduced motion.
 - [x] **Milestone 11 — Application shell and screen flow.** A full-screen stage with title, game, settings, and
       game-over screens, and accessible navigation between them.
-- [ ] **Milestone 12 — Visual identity and animation.** Illustrated scenery, board and character artwork, and a
+- [x] **Milestone 12 — Visual identity and animation.** Illustrated scenery, board and character artwork, and a
       shared motion system for screen transitions, controls, and game feedback.
 - [ ] **Milestone 13 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.
 
