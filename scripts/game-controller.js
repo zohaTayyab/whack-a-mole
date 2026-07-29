@@ -45,6 +45,7 @@ import {
   setSoundAvailable,
   setStatusMessage,
   setTimeRemaining,
+  showHitFeedback,
 } from "./ui.js";
 
 const STARTING_SCORE = 0;
@@ -344,6 +345,7 @@ export function createGameController({
     score += POINTS_PER_HIT;
     setScore(score);
     setStatusMessage(hitMessage(score));
+    showHitFeedback(holeIndex);
     optional(() => audio.playHit());
   }
 

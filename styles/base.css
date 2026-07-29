@@ -30,6 +30,9 @@
   --color-soil: light-dark(#4a3728, #17110c);
   --color-soil-muted: light-dark(#6d6152, #2e2921);
   --color-focus: light-dark(#1b4bb8, #8ab4ff);
+  /* Used only for the last seconds of the countdown, so the urgency reads at a
+     glance without relying on the pulse alone. */
+  --color-danger: light-dark(#b23124, #f0968b);
 
   /* Display lettering. A fill, an edge for the layered outline, a highlight for
      the raised top, and a cast for the drop shadow — a day and a night value
@@ -89,8 +92,15 @@
   /* The base step under its former name, so existing surfaces keep their depth. */
   --shadow-sm: var(--elevation-1);
 
-  /* Motion. Overridden to zero under prefers-reduced-motion. */
+  /* Motion. One set of timings and one easing curve, shared by every animation
+     so screen changes, button presses, and game feedback all move alike. The
+     short step is for controls answering a press; the slow step is for screens
+     arriving and for the game-over celebration. Both durations drop to zero
+     under prefers-reduced-motion, which is what removes the travel while leaving
+     the end state each animation settles on. */
   --motion-duration: 150ms;
+  --motion-duration-slow: 340ms;
+  --motion-ease: cubic-bezier(0.22, 0.7, 0.28, 1);
 
   /* Minimum interactive target, ~44px. */
   --target-min: 2.75rem;
@@ -209,5 +219,6 @@ button:disabled {
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-duration: 0ms;
+    --motion-duration-slow: 0ms;
   }
 }

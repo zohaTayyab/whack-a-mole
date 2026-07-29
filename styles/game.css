@@ -134,6 +134,43 @@
   display: none;
 }
 
+/* Every screen arrives the same way: a brief fade as it takes the stage.
+   Because a hidden screen is display:none, showing one restarts this, so each
+   navigation plays it afresh. The fade is opacity only, with no transform, so it
+   never shifts the board a keyboard or a test measures against the viewport
+   mid-animation; the rise belongs to the content that arrives on it. It drops to
+   nothing under reduced motion, leaving the screen simply present. */
+.screen:not([hidden]) {
+  animation: screen-in var(--motion-duration-slow) var(--motion-ease) both;
+}
+
+/* The content rises into place, but the board is left out of it: a downward
+   transform on the bottom-most element extends the stage's scrollable region for
+   as long as it runs, which would momentarily push the play area into needing a
+   scroll. Leaving the board still keeps the fit exact while everything above it
+   settles in. */
+.screen:not([hidden]) > *:not(.board-panel) {
+  animation: content-rise var(--motion-duration-slow) var(--motion-ease) both;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes content-rise {
+  from {
+    transform: translateY(0.6rem);
+  }
+  to {
+    transform: none;
+  }
+}
+
 /* Screen titles: the same family as the logo but quieter — the text keeps its
    readable colour and is given a raised top highlight and a soft cast, so it
    reads as display lettering without competing with the logo above it. */
@@ -392,6 +429,59 @@
   border-radius: var(--radius-pill);
 }
 
+/* The countdown turns urgent for its last stretch: the number and the bar go to
+   the danger colour with ten seconds left, and the number pulses for the final
+   five, so time pressure reads without touching the numbers themselves or
+   announcing anything. The colour carries the meaning; the pulse only reinforces
+   it, and drops away under reduced motion. */
+.hud__reading--time[data-urgency="low"] .hud__value--time,
+.hud__reading--time[data-urgency="critical"] .hud__value--time {
+  color: var(--color-danger);
+}
+
+.hud__reading--time[data-urgency="low"] .time-bar::-webkit-progress-value,
+.hud__reading--time[data-urgency="critical"] .time-bar::-webkit-progress-value {
+  background-color: var(--color-danger);
+}
+
+.hud__reading--time[data-urgency="low"] .time-bar::-moz-progress-bar,
+.hud__reading--time[data-urgency="critical"] .time-bar::-moz-progress-bar {
+  background-color: var(--color-danger);
+}
+
+.hud__reading--time[data-urgency="critical"] #time-remaining {
+  display: inline-block;
+  animation: time-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes time-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.14);
+  }
+}
+
+/* The score gives a quick pop each time it rises, so a hit registers on the
+   reading as well as on the board. */
+.hud__value[data-pop="true"] {
+  animation: score-pop var(--motion-duration) var(--motion-ease);
+}
+
+@keyframes score-pop {
+  0% {
+    transform: none;
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: none;
+  }
+}
+
 /* Heads-up controls: two icon buttons, so pause and restart stay one tap away
    without crowding the play surface with words. */
 .hud__controls {
@@ -411,6 +501,7 @@
   background-color: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-text);
+  box-shadow: var(--elevation-1);
 }
 
 .button--icon:not(:disabled):hover {
@@ -501,6 +592,43 @@
 
 .controls__actions--over {
   justify-content: center;
+}
+
+/* The game-over celebration. As the screen arrives the final score springs in,
+   and a record badge follows with a little more spring. Both settle to their
+   resting state, so under reduced motion, where the durations are zero, they are
+   simply there. */
+.screen--over:not([hidden]) .over__value--final {
+  animation: celebrate-score var(--motion-duration-slow) var(--motion-ease) both;
+}
+
+.screen--over:not([hidden]) .over__record:not([hidden]) {
+  animation: celebrate-badge var(--motion-duration-slow) var(--motion-ease) both;
+}
+
+@keyframes celebrate-score {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes celebrate-badge {
+  0% {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Settings */
@@ -633,16 +761,24 @@
 
 .button--primary:not(:disabled):hover {
   background-color: var(--color-primary-strong);
-  box-shadow: var(--elevation-2);
 }
 
 .button--secondary {
   background-color: var(--color-surface);
   border-color: var(--color-border);
+  box-shadow: var(--elevation-1);
 }
 
 .button--secondary:not(:disabled):hover {
   background-color: var(--color-surface-sunken);
+}
+
+/* One lift and one press shared by every button, so all three variants answer
+   the pointer the same way: hover raises the surface a step, and pressing sinks
+   it below its rest. */
+.button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: var(--elevation-2);
 }
 
 .button:not(:disabled):active {
@@ -650,6 +786,7 @@
   box-shadow: var(--elevation-1);
 }
 
+/* Disabled sits flat: no lift, no shadow, so it plainly cannot be pressed. */
 .button:disabled {
   background-color: var(--color-surface-sunken);
   border-color: var(--color-border);
@@ -855,6 +992,65 @@
   box-shadow: inset 0 0.2rem 0.4rem rgb(0 0 0 / 0.35);
 }
 
+/* Hit feedback. Both are added to the struck hole when a mole is caught and
+   remove themselves once done, so they never accumulate. Decoration only: they
+   take no pointer events and are hidden from assistive technology, which is told
+   the outcome through the score and the status line. Under reduced motion the
+   token durations fall to zero, so each resolves to its faded-out end at once
+   and nothing travels. */
+.score-float,
+.hit-burst {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* A "+1" rising from the hole. Outlined so it reads over grass or mole alike. */
+.score-float {
+  left: 50%;
+  top: 14%;
+  color: var(--color-on-primary);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 0.2rem var(--color-primary-strong),
+    0 1px 2px rgb(0 0 0 / 0.45);
+  animation: score-float var(--motion-duration-slow) var(--motion-ease) forwards;
+}
+
+@keyframes score-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0.3rem) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -1.6rem) scale(1.1);
+  }
+}
+
+/* A ring flashing outward over the opening at the moment of the hit. */
+.hit-burst {
+  inset: 14%;
+  border: 0.2rem solid var(--color-on-primary);
+  border-radius: 50%;
+  opacity: 0;
+  animation: hit-burst var(--motion-duration-slow) var(--motion-ease) forwards;
+}
+
+@keyframes hit-burst {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
 @media (min-width: 30rem) {
   .board {
     gap: var(--space-xs);
@@ -1049,6 +1245,12 @@
 
   .hammer[data-hammer-striking="true"]::after {
     opacity: 1;
+  }
+
+  /* The countdown's urgent colour stays, but its pulse — the one animation on a
+     fixed duration rather than the shared token — is stopped here. */
+  .hud__reading--time[data-urgency="critical"] #time-remaining {
+    animation: none;
   }
 }
 

@@ -5,6 +5,7 @@ import { DEFAULT_MUSIC_VOLUME, HOLE_COUNT } from "./config.js";
 
 const SELECTORS = {
   score: "#score",
+  timeReading: ".hud__reading--time",
   timeRemaining: "#time-remaining",
   timeBar: "#time-bar",
   bestScore: "#best-score",
@@ -51,6 +52,22 @@ const MOLE_VISIBLE_ATTRIBUTE = "moleVisible";
 /* Appended to a hole's authored name so the mole is announced as part of the
    button's own accessible name rather than through the live status region. */
 const MOLE_VISIBLE_NAME_SUFFIX = ", mole visible";
+
+/* Seconds at or below which the countdown reading takes on, then intensifies,
+   an urgent look. Purely visual: the reading is not a live region, so this adds
+   no announcement, and the numbers themselves are unchanged. */
+const LOW_TIME_SECONDS = 10;
+const CRITICAL_TIME_SECONDS = 5;
+
+/* How long a hit's floating reward and impact linger before they are removed.
+   It is only a safety net: each element is normally removed the moment its
+   animation ends, and this clears it even where no animation runs, such as
+   under reduced motion. */
+const HIT_FEEDBACK_CLEANUP_MS = 800;
+
+/* The last score rendered, so a rise can be told from the reset to zero at the
+   start of a round and only a rise makes the reading pulse. */
+let previousScore = 0;
 
 let elements = null;
 /* Whether a screen has ever been shown. The opening screen simply appears, and
@@ -265,6 +282,53 @@ export function setScore(score) {
   }
 
   elements.score.textContent = String(score);
+  if (score > previousScore) {
+    retrigger(elements.score, "pop");
+  }
+  previousScore = score;
+}
+
+/* The reward that rises from the struck hole: a "+1" floats up and a ring
+   flashes over the opening. Both are decoration, hidden from assistive
+   technology, and each clears itself once its animation is done. The score
+   reading's own pulse is handled in setScore, where the rise is known. */
+export function showHitFeedback(holeIndex) {
+  if (!elements) {
+    return;
+  }
+
+  const hole = elements.holes[holeIndex];
+  if (!hole) {
+    return;
+  }
+
+  spawnTransient(hole, "score-float", "+1");
+  spawnTransient(hole, "hit-burst");
+}
+
+/* Replays a one-shot animation by clearing its trigger, forcing a reflow so the
+   removal takes effect, and setting it again. */
+function retrigger(element, attribute) {
+  delete element.dataset[attribute];
+  void element.offsetWidth;
+  element.dataset[attribute] = "true";
+}
+
+/* Adds a short-lived decorative element that removes itself when its animation
+   ends, with a timed fallback for the cases where none runs. */
+function spawnTransient(parent, className, text) {
+  const element = document.createElement("span");
+  element.className = className;
+  element.setAttribute("aria-hidden", "true");
+  if (text) {
+    element.textContent = text;
+  }
+
+  const remove = () => element.remove();
+  element.addEventListener("animationend", remove, { once: true });
+  setTimeout(remove, HIT_FEEDBACK_CLEANUP_MS);
+
+  parent.appendChild(element);
 }
 
 /* Best Score carries no aria-live of its own. It is written whenever the
@@ -296,6 +360,16 @@ export function setTimeRemaining(seconds) {
 
   elements.timeRemaining.textContent = String(seconds);
   elements.timeBar.value = seconds;
+
+  const urgency =
+    seconds <= CRITICAL_TIME_SECONDS
+      ? "critical"
+      : seconds <= LOW_TIME_SECONDS
+        ? "low"
+        : "none";
+  if (elements.timeReading.dataset.urgency !== urgency) {
+    elements.timeReading.dataset.urgency = urgency;
+  }
 }
 
 /* The game-over readings live on their own screen, filled in before it is
