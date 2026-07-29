@@ -1230,9 +1230,16 @@
   }
 }
 
-/* Reduced motion keeps the feedback but removes the travel: the hammer simply
-   appears struck for a moment instead of swinging into place. */
+/* Reduced motion keeps every animation's feedback and drops only its travel.
+   Most animations already do this on their own: the shared motion tokens fall to
+   zero, so a fade, a rise, a pop, or the game-over celebration lands on its
+   settled end state at once rather than travelling to it. The rules below are
+   for the animations that need saying so explicitly — the ones on a fixed
+   duration the tokens do not reach, and the ones whose own end state is a
+   faded-out one, which would otherwise leave nothing behind. */
 @media (prefers-reduced-motion: reduce) {
+  /* The hammer simply appears struck for a moment instead of swinging in, its
+     impact burst held rather than expanding. */
   .hammer[data-hammer-striking="true"],
   .hammer[data-hammer-striking="true"] .hammer__art,
   .hammer[data-hammer-striking="true"]::after {
@@ -1251,6 +1258,22 @@
      fixed duration rather than the shared token — is stopped here. */
   .hud__reading--time[data-urgency="critical"] #time-remaining {
     animation: none;
+  }
+
+  /* The hit reward would otherwise animate straight to its faded-out end and
+     leave nothing to see. Instead the "+1" and the ring appear in place and
+     hold; the timed fallback in script removes them, since with no animation
+     there is no animationend to remove them on. */
+  .score-float {
+    animation: none;
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+
+  .hit-burst {
+    animation: none;
+    opacity: 0.85;
+    transform: none;
   }
 }
 
