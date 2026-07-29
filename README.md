@@ -51,7 +51,7 @@ Neither has been carried out yet.
   checkbox overrides it. An explicit choice is remembered and outranks the system on the next visit; simply
   matching the system is not treated as a choice, so the game keeps following it if it changes. Both palettes
   were checked for contrast.
-- **Hammer.** A hammer drawn entirely in CSS follows the pointer across the board on devices with a precise
+- **Hammer.** A hammer drawn as a scalable vector follows the pointer across the board on devices with a precise
   pointer, and strikes wherever a hole is activated by mouse, touch, or keyboard. It is decoration: it is hidden
   from assistive technology, never takes pointer events, and cannot affect the score, which is still decided
   solely by activating a hole. Its motion reduces to a still strike when reduced motion is preferred.

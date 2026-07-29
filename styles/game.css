@@ -735,17 +735,21 @@
     0 -0.12rem 0 var(--color-grass-light);
 }
 
-/* The mole. Drawn with CSS only: a rounded body with eyes and a snout, always
-   present but hidden until the cycle reveals it, so the reveal can transition.
-   The dark values keep the mole a warm brown against a darker opening, so it
-   stays as easy to pick out as it is in light. */
+/* The mole. One hand-authored SVG, referenced from every hole and coloured by
+   these tokens, so a single drawing serves both themes. The dark body is kept a
+   shade deeper than the light one so the pale face marks still read against it:
+   those marks and the mole's shape, not the body colour, are what make it a
+   recognisable character rather than a coloured blob, and so distinguishable
+   without relying on colour alone. */
 .board {
-  /* The dark body is kept a shade deeper than the light one so the pale face
-     marks still read against it: those marks, not the body colour, are what
-     make the mole a recognisable shape rather than a coloured blob. */
   --color-mole: light-dark(#9a7350, #9c7452);
   --color-mole-edge: light-dark(#402f22, #2a1d13);
   --color-mole-face: light-dark(#f4ece0, #f8f2e7);
+}
+
+/* The sprite sheet holds the drawing and is never seen in its own right. */
+.sprites {
+  position: absolute;
 }
 
 /* While the hammer is following the pointer it stands in for the cursor. Only
@@ -756,36 +760,74 @@
   cursor: none;
 }
 
-.hole::after {
-  content: "";
+/* The well is the window the mole rises through: it covers the opening, hides
+   what sinks below the ground line, and fades its lower edge so the body melts
+   into the dark of the hole rather than ending on a hard line. */
+.mole {
   position: absolute;
-  bottom: 24%;
-  left: 50%;
-  width: 40%;
-  height: 40%;
-  background-color: var(--color-mole);
-  background-image: radial-gradient(
-      circle at 32% 34%,
-      var(--color-mole-edge) 0 13%,
-      transparent 13%
-    ),
-    radial-gradient(circle at 68% 34%, var(--color-mole-edge) 0 13%, transparent 13%),
-    radial-gradient(circle at 50% 66%, var(--color-mole-face) 0 20%, transparent 20%);
-  border: 2px solid var(--color-mole-edge);
-  border-radius: 50% 50% 42% 42%;
-  opacity: 0;
-  /* Scale only. A vertical slide would carry the mole outside the opening
-     while it fades. */
-  transform: translateX(-50%) scale(0.55);
-  transition: opacity var(--motion-duration) ease,
-    transform var(--motion-duration) ease;
+  inset: -10% 11% 40% 11%;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 88%, transparent);
+  mask-image: linear-gradient(to bottom, #000 88%, transparent);
 }
 
-/* Shape and size change together with the fill, so the mole is distinguishable
-   without relying on colour alone. */
-.hole[data-mole-visible="true"]::after {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
+/* The drawing sits on the floor of the well and, at rest, is pushed down so
+   only ground shows. Revealing the mole slides it up to full height; the well
+   clips whatever is still below the rim, so it reads as climbing out. */
+.mole__art {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  aspect-ratio: 100 / 130;
+  transform: translateY(118%);
+  transform-origin: 50% 100%;
+  transition: transform var(--motion-duration) ease;
+}
+
+.hole[data-mole-visible="true"] .mole__art {
+  transform: translateY(10%);
+}
+
+.mole__fur {
+  fill: var(--color-mole);
+}
+
+/* The silhouette parts carry an outline so the mole keeps its shape against the
+   dark opening; the low body and paws are left unstroked, so their overlaps
+   never draw seams across the character. */
+.mole__fur--edge {
+  stroke: var(--color-mole-edge);
+  stroke-width: 2.5;
+}
+
+.mole__face {
+  fill: var(--color-mole-face);
+}
+
+.mole__dark {
+  fill: var(--color-mole-edge);
+}
+
+.mole__shine {
+  fill: var(--color-mole-face);
+}
+
+.mole__whisker {
+  fill: none;
+  stroke: var(--color-mole-edge);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
+.mole__smile {
+  fill: none;
+  stroke: var(--color-mole-edge);
+  stroke-width: 2.2;
+  stroke-linecap: round;
 }
 
 .hole:not(:disabled):hover {
@@ -876,42 +918,56 @@
   visibility: visible;
 }
 
+.hammer__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* A drop shadow gives the mallet its own weight over the board, and deepens
+     as it slams so the strike lands with force. */
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
+}
+
 .hammer__head {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 62%;
-  height: 44%;
-  background-color: var(--hammer-head);
-  /* The band reads as a separate ring rather than a stripe of the same
-     material, which is what makes the shape recognisable at this size. */
-  background-image: linear-gradient(
-    to right,
-    transparent 0 38%,
-    var(--hammer-band) 38% 56%,
-    transparent 56%
-  );
-  border: 2px solid var(--hammer-edge);
-  border-radius: 0.25rem;
+  fill: var(--hammer-head);
+  stroke: var(--hammer-edge);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+/* The metal striking cap, a clearly separate material at the head's face, is
+   what makes the shape read as a mallet at a glance rather than a coloured bar. */
+.hammer__face {
+  fill: var(--hammer-band);
+  stroke: var(--hammer-edge);
+  stroke-width: 3;
+  stroke-linejoin: round;
 }
 
 .hammer__handle {
-  position: absolute;
-  right: 8%;
-  bottom: 6%;
-  width: 46%;
-  height: 15%;
-  background-color: var(--hammer-handle);
-  border: 2px solid var(--hammer-edge);
-  border-radius: 0.2rem;
-  transform: rotate(38deg);
-  transform-origin: 100% 50%;
+  fill: var(--hammer-handle);
+  stroke: var(--hammer-edge);
+  stroke-width: 3;
+  stroke-linejoin: round;
 }
 
-/* The strike: the hammer swings down, and an impact burst appears under the
-   head. Both are driven by one attribute so a strike cannot half-apply. */
+.hammer__band {
+  stroke: var(--hammer-edge);
+  stroke-width: 2;
+  opacity: 0.35;
+}
+
+/* The strike: the hammer winds up, slams past the hole, and settles back, while
+   an impact burst appears under the head. All are driven by one attribute so a
+   strike cannot half-apply. */
 .hammer[data-hammer-striking="true"] {
-  animation: hammer-strike var(--hammer-strike-duration, 220ms) ease-in-out;
+  animation: hammer-strike var(--hammer-strike-duration, 260ms) ease-in-out;
+}
+
+/* The head squashes into the board at the moment of contact and its shadow
+   snaps tight, so the blow reads as landing with weight rather than merely
+   arriving. */
+.hammer[data-hammer-striking="true"] .hammer__art {
+  animation: hammer-land var(--hammer-strike-duration, 260ms) ease-out;
 }
 
 .hammer[data-hammer-striking="true"]::after {
@@ -926,18 +982,40 @@
     var(--hammer-spark) 0 38%,
     transparent 62%
   );
-  animation: hammer-spark var(--hammer-strike-duration, 220ms) ease-out;
+  animation: hammer-spark var(--hammer-strike-duration, 260ms) ease-out;
 }
 
 @keyframes hammer-strike {
   0% {
     transform: rotate(-38deg);
   }
-  45% {
-    transform: rotate(4deg);
+  22% {
+    transform: rotate(-52deg);
+  }
+  48% {
+    transform: rotate(9deg);
+  }
+  64% {
+    transform: rotate(-3deg);
   }
   100% {
     transform: rotate(-38deg);
+  }
+}
+
+@keyframes hammer-land {
+  0%,
+  40% {
+    transform: none;
+    filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
+  }
+  50% {
+    transform: scaleY(0.9);
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.5));
+  }
+  70% {
+    transform: none;
+    filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
   }
 }
 
@@ -960,6 +1038,7 @@
    appears struck for a moment instead of swinging into place. */
 @media (prefers-reduced-motion: reduce) {
   .hammer[data-hammer-striking="true"],
+  .hammer[data-hammer-striking="true"] .hammer__art,
   .hammer[data-hammer-striking="true"]::after {
     animation: none;
   }

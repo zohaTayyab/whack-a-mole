@@ -14,6 +14,47 @@
   </head>
 
   <body>
+    <!-- The mole, hand-authored once and referenced from every hole below, so
+         one drawing serves all nine. It is decoration: the sprite sheet is
+         hidden from layout and assistive technology, and each reference is
+         hidden too, since the hole announces the mole in words. Every colour is
+         a token with a day and a night value, set on the board and inherited
+         in, so the one drawing serves both themes. -->
+    <svg class="sprites" aria-hidden="true" width="0" height="0" focusable="false">
+      <defs>
+        <symbol id="mole-shape" viewBox="0 0 100 130">
+          <!-- Body and paws sit low, so the hole's rim clips them and the mole
+               reads as rising out of the ground rather than floating. -->
+          <ellipse class="mole__fur" cx="50" cy="108" rx="34" ry="30" />
+          <circle class="mole__fur" cx="30" cy="100" r="10" />
+          <circle class="mole__fur" cx="70" cy="100" r="10" />
+          <!-- Ears, each with a warmer inner patch. -->
+          <circle class="mole__fur mole__fur--edge" cx="25" cy="30" r="15" />
+          <circle class="mole__fur mole__fur--edge" cx="75" cy="30" r="15" />
+          <circle class="mole__face" cx="25" cy="31" r="7" />
+          <circle class="mole__face" cx="75" cy="31" r="7" />
+          <!-- Head, then the pale muzzle across its lower half. -->
+          <ellipse class="mole__fur mole__fur--edge" cx="50" cy="58" rx="40" ry="37" />
+          <ellipse class="mole__face" cx="50" cy="74" rx="26" ry="20" />
+          <!-- Whiskers sweep out from the muzzle, three to a side. -->
+          <path class="mole__whisker" d="M32 68 Q16 64 6 60" />
+          <path class="mole__whisker" d="M31 74 Q14 74 4 73" />
+          <path class="mole__whisker" d="M32 80 Q16 84 7 88" />
+          <path class="mole__whisker" d="M68 68 Q84 64 94 60" />
+          <path class="mole__whisker" d="M69 74 Q86 74 96 73" />
+          <path class="mole__whisker" d="M68 80 Q84 84 93 88" />
+          <!-- Eyes with a catch-light, a rounded snout, and a small smile. -->
+          <ellipse class="mole__dark" cx="35" cy="53" rx="6" ry="7" />
+          <ellipse class="mole__dark" cx="65" cy="53" rx="6" ry="7" />
+          <circle class="mole__shine" cx="37" cy="50" r="2" />
+          <circle class="mole__shine" cx="67" cy="50" r="2" />
+          <ellipse class="mole__dark" cx="50" cy="67" rx="8.5" ry="6.5" />
+          <circle class="mole__shine" cx="47" cy="65" r="1.8" />
+          <path class="mole__smile" d="M40 80 Q50 88 60 80" />
+        </symbol>
+      </defs>
+    </svg>
+
     <!-- Hand-authored scenery behind the stage: a sky, a sun that becomes a
          moon at night, and two rows of hills. Decoration only, so it is hidden
          from assistive technology and takes no pointer events. Every colour is
@@ -191,46 +232,82 @@
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 1</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 2</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 3</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 4</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 5</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 6</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 7</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 8</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
             <li class="board__cell">
               <button class="hole" type="button" disabled>
                 <span class="visually-hidden">Hole 9</span>
+                <span class="mole" aria-hidden="true"
+                  ><svg class="mole__art" viewBox="0 0 100 130" focusable="false">
+                    <use href="#mole-shape" /></svg
+                ></span>
               </button>
             </li>
           </ul>
@@ -238,8 +315,17 @@
                already give in text, so it is hidden from assistive technology
                and never receives pointer events. -->
           <div class="hammer" id="hammer" aria-hidden="true">
-            <span class="hammer__handle"></span>
-            <span class="hammer__head"></span>
+            <!-- A mallet drawn upright, then rotated so the head rises to the
+                 upper right and the handle base sits at the pivot the swing
+                 turns about. -->
+            <svg class="hammer__art" viewBox="0 0 100 100" focusable="false">
+              <g transform="rotate(48 46 54)">
+                <rect class="hammer__handle" x="44" y="46" width="12" height="50" rx="6" />
+                <rect class="hammer__head" x="18" y="12" width="64" height="32" rx="11" />
+                <rect class="hammer__face" x="66" y="12" width="16" height="32" rx="8" />
+                <line class="hammer__band" x1="40" y1="13" x2="40" y2="43" />
+              </g>
+            </svg>
           </div>
         </section>
       </section>
