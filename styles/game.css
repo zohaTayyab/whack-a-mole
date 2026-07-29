@@ -7,6 +7,50 @@
   margin-inline: auto;
 }
 
+/* Scenery: a fixed layer behind everything, drawn once and coloured by the
+   day/night tokens. It never scrolls with the stage and never intercepts a
+   pointer, so it stays purely a backdrop. */
+.scenery {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.scenery__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.scenery__sky-top {
+  stop-color: var(--scenery-sky-top);
+}
+
+.scenery__sky-bottom {
+  stop-color: var(--scenery-sky-bottom);
+}
+
+.scenery__glow-in {
+  stop-color: var(--scenery-glow-in);
+}
+
+.scenery__glow-out {
+  stop-color: var(--scenery-glow-out);
+}
+
+.scenery__orb {
+  fill: var(--scenery-orb);
+}
+
+.scenery__hill-far {
+  fill: var(--scenery-hill-far);
+}
+
+.scenery__hill-near {
+  fill: var(--scenery-hill-near);
+}
+
 /* Header */
 
 .page-header {
@@ -39,9 +83,16 @@
 /* Measured rather than full width, so a line stays comfortable to read. It is
    no longer centred: it now sits in a screen whose heading is aligned to the
    start, and centring it there would leave the two visibly out of line. */
+/* A plaque behind the intro, so the text keeps an opaque backing over the
+   scenery rather than sitting on the illustration. */
 .page-intro {
   max-width: 52ch;
   margin-block-start: var(--space-xs);
+  padding: var(--space-2xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-1);
   color: var(--color-text-muted);
   font-size: var(--text-lg);
 }
@@ -121,11 +172,20 @@
 
 /* The score to beat, sized to draw the eye without competing with the Play
    control below it. */
+/* The best-score reading as a plaque badge, centred, so it too has an opaque
+   backing over the scenery. */
 .title-best {
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: var(--space-2xs);
+  width: fit-content;
+  margin-inline: auto;
+  padding: var(--space-3xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--elevation-1);
   color: var(--color-text-muted);
 }
 
@@ -383,10 +443,18 @@
   text-align: center;
 }
 
+/* A plaque holding the game-over readings, so the final and best scores keep an
+   opaque backing over the scenery. */
 .over__readings {
   display: grid;
   gap: var(--space-2xs);
   margin-block: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-2);
+  text-align: start;
 }
 
 .over__reading {
@@ -418,7 +486,15 @@
   line-height: 1.1;
 }
 
+/* The record note as a plaque badge, so it also has a backing of its own. */
 .over__record {
+  width: fit-content;
+  margin-inline: auto;
+  padding: var(--space-3xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--elevation-1);
   color: var(--color-primary-strong);
   font-weight: 600;
 }
@@ -620,26 +696,43 @@
   display: flex;
 }
 
+/* Each hole is a mound: a dome of turf, lit at the top where the light falls and
+   shaded round its base, so it reads as raised out of the field rather than
+   printed flat on it. */
 .hole {
   position: relative;
   width: 100%;
   padding: 0;
   background-color: var(--color-grass);
+  background-image: radial-gradient(
+    circle at 50% 32%,
+    var(--color-grass-light),
+    var(--color-grass) 64%
+  );
   border: none;
   border-radius: 50%;
-  box-shadow: var(--shadow-sm);
-  transition: background-color var(--motion-duration) ease,
+  box-shadow: var(--elevation-1),
+    inset 0 0.2rem 0.25rem rgb(255 255 255 / 0.18),
+    inset 0 -0.5rem 0.7rem rgb(0 0 0 / 0.22);
+  transition: box-shadow var(--motion-duration) ease,
     transform var(--motion-duration) ease;
 }
 
-/* The recessed opening. */
+/* The opening: a pit sunk into the mound, with a rim of light on its upper edge
+   where the turf lifts away, and a deep shadow gathering inside it. */
 .hole::before {
   content: "";
   position: absolute;
-  inset: 18%;
+  inset: 20%;
   background-color: var(--color-soil);
+  background-image: radial-gradient(
+    circle at 50% 30%,
+    var(--color-soil),
+    rgb(0 0 0 / 0.85) 135%
+  );
   border-radius: 50%;
-  box-shadow: inset 0 0.35rem 0.6rem rgb(0 0 0 / 0.45);
+  box-shadow: inset 0 0.4rem 0.7rem rgb(0 0 0 / 0.6),
+    0 -0.12rem 0 var(--color-grass-light);
 }
 
 /* The mole. Drawn with CSS only: a rounded body with eyes and a snout, always
@@ -696,21 +789,28 @@
 }
 
 .hole:not(:disabled):hover {
-  background-color: var(--color-grass-deep);
   transform: translateY(-2px);
+  box-shadow: var(--elevation-2),
+    inset 0 0.2rem 0.25rem rgb(255 255 255 / 0.22),
+    inset 0 -0.5rem 0.7rem rgb(0 0 0 / 0.22);
 }
 
 .hole:not(:disabled):active {
   transform: translateY(0);
 }
 
+/* A disabled hole is not in play, so the mound flattens to plain muted turf and
+   the opening loses its depth. */
 .hole:disabled {
   background-color: var(--color-grass-muted);
+  background-image: none;
   box-shadow: none;
 }
 
 .hole:disabled::before {
   background-color: var(--color-soil-muted);
+  background-image: none;
+  box-shadow: inset 0 0.2rem 0.4rem rgb(0 0 0 / 0.35);
 }
 
 @media (min-width: 30rem) {
@@ -734,6 +834,14 @@
   display: grid;
   place-content: center;
   min-block-size: 0;
+  /* Turf: the board sits in a patch of grass, faintly mown into stripes, so the
+     mounds rise out of a field rather than off a flat card. */
+  background-color: var(--color-turf);
+  background-image: repeating-linear-gradient(
+    118deg,
+    transparent 0 1.75rem,
+    var(--color-turf-line) 1.75rem 3.5rem
+  );
 }
 
 .hammer {
@@ -874,14 +982,23 @@
   color: var(--color-text-muted);
 }
 
-/* Footer */
-
+/* Footer. Over the scenery the credit sits on its own plaque rather than a rule
+   drawn across the hills. */
 .page-footer {
   padding-block: var(--space-sm);
-  border-block-start: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   text-align: center;
+}
+
+.page-footer p {
+  display: inline-block;
+  max-width: 100%;
+  padding: var(--space-3xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--elevation-1);
 }
 
 /* Short viewports — small phones, landscape, small windows, high zoom — give

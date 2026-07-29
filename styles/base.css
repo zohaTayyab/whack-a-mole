@@ -21,8 +21,12 @@
   --color-on-primary: light-dark(#ffffff, #10231a);
   --color-accent: light-dark(#8a4f14, #e2a86a);
   --color-grass: light-dark(#7aa363, #4a6b41);
+  --color-grass-light: light-dark(#a2c986, #6a9558);
   --color-grass-deep: light-dark(#628a4c, #5b8250);
   --color-grass-muted: light-dark(#a3b795, #3b463a);
+  /* The turf the board sits in, and the mown line across it. */
+  --color-turf: light-dark(#88ac69, #33502e);
+  --color-turf-line: light-dark(#7ba05c, #2c4727);
   --color-soil: light-dark(#4a3728, #17110c);
   --color-soil-muted: light-dark(#6d6152, #2e2921);
   --color-focus: light-dark(#1b4bb8, #8ab4ff);
@@ -36,6 +40,16 @@
   --color-display-edge: light-dark(#fbf7ee, #0e1f16);
   --color-display-highlight: light-dark(#5a8f6f, #bfe6cd);
   --color-display-cast: light-dark(rgb(31 76 52 / 0.30), rgb(0 0 0 / 0.55));
+
+  /* Scenery: the sky, the sun that becomes a moon, and the hills, each a day
+     and a night value so one drawing serves both. */
+  --scenery-sky-top: light-dark(#8ec5e6, #0c1730);
+  --scenery-sky-bottom: light-dark(#e7f2ec, #1c2c4d);
+  --scenery-orb: light-dark(#ffdd78, #eef3fa);
+  --scenery-glow-in: light-dark(rgb(255 240 186 / 0.85), rgb(214 226 244 / 0.5));
+  --scenery-glow-out: light-dark(rgb(255 240 186 / 0), rgb(214 226 244 / 0));
+  --scenery-hill-far: light-dark(#aecb8f, #223c2b);
+  --scenery-hill-near: light-dark(#83aa6a, #18301e);
 
   /* Typography */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",

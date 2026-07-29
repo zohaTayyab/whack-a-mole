@@ -14,6 +14,41 @@
   </head>
 
   <body>
+    <!-- Hand-authored scenery behind the stage: a sky, a sun that becomes a
+         moon at night, and two rows of hills. Decoration only, so it is hidden
+         from assistive technology and takes no pointer events. Every colour is
+         a token with a day and a night value, so the one drawing serves both. -->
+    <div class="scenery" aria-hidden="true">
+      <svg
+        class="scenery__art"
+        viewBox="0 0 1200 800"
+        preserveAspectRatio="xMidYMax slice"
+        focusable="false"
+      >
+        <defs>
+          <linearGradient id="scenery-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop class="scenery__sky-top" offset="0" />
+            <stop class="scenery__sky-bottom" offset="1" />
+          </linearGradient>
+          <radialGradient id="scenery-glow">
+            <stop class="scenery__glow-in" offset="0" />
+            <stop class="scenery__glow-out" offset="1" />
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="1200" height="800" fill="url(#scenery-sky)" />
+        <circle class="scenery__glow" cx="965" cy="175" r="165" fill="url(#scenery-glow)" />
+        <circle class="scenery__orb" cx="965" cy="175" r="62" />
+        <path
+          class="scenery__hill-far"
+          d="M0,545 C210,485 430,525 645,505 C860,485 1045,528 1200,498 L1200,800 L0,800 Z"
+        />
+        <path
+          class="scenery__hill-near"
+          d="M0,655 C255,600 445,662 700,642 C925,625 1065,668 1200,644 L1200,800 L0,800 Z"
+        />
+      </svg>
+    </div>
+
     <header class="page-header">
       <h1 class="page-title">Whack-a-Mole</h1>
     </header>
