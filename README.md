@@ -7,7 +7,8 @@ Development follows an incremental milestone workflow.
 
 ## Status
 
-Milestone 12 (visual identity and animation) is complete. The game is organised into four screens — title,
+Milestone 13 (final testing, documentation, and deployment) is complete. The game is published with GitHub Pages
+and playable at <https://zohatayyab.github.io/whack-a-mole/>. It is organised into four screens — title,
 game, settings, and game over — shown one at a time on a full-screen stage, set against hand-drawn scenery that
 shifts from day to night with the theme. Focus moves to a screen's heading as it opens, and Escape leaves the
 settings screen. A round lasts 60 seconds at every difficulty. Moles appear in random holes, one at a time, and
@@ -22,7 +23,8 @@ the best score and notes whether a record was set, with Play Again and Menu. The
 in portrait and landscape, from small phones to desktops. Backgrounding the page pauses the round and returns to
 it with the same remaining time; leaving and returning with the browser's Back button restores it ready to play.
 
-Cross-browser checks and deployment are Milestone 13, which has not been carried out yet.
+The site is deployed with GitHub Pages. The browsers, viewports, and input methods actually exercised — and those
+that were not — are listed under [Testing](#testing).
 
 ## Features
 
@@ -159,7 +161,7 @@ mouse, keyboard and touch, difficulty, persistence, audio, themes, colour contra
 thresholds, the hammer, the screen flow, responsive layout, and the awkward cases such as returning through the
 back/forward cache.
 
-Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
+Verified on macOS 14.8.4 with Google Chrome 151 running headless:
 
 - Page structure, accessible names, and the accessibility tree for each of the four screens, including which
   regions announce changes.
@@ -182,6 +184,9 @@ Verified so far, on macOS 14.8.4 with Google Chrome 150 running headless:
 - Round lifecycle, scoring, timing, difficulty, persistence, audio, themes, volume, the hammer, and the player's
   Pause control.
 - Behaviour when storage is denied or holds corrupt data, and when the browser refuses to create audio.
+- The deployed GitHub Pages site, loaded in Google Chrome 151 on macOS outside headless mode: every asset resolves
+  over the project subpath, no external request is made, the console stays clear on load, and a full round runs
+  from the title screen through the countdown to game over, with focus landing on the game-over heading.
 
 Not carried out:
 
@@ -191,7 +196,25 @@ Not carried out:
 - Selecting a difficulty with the arrow keys, Home, or End. The control is a native select and the page does not
   intercept those keys, but headless Chrome provides no native select menu to act on them.
 
-Cross-browser and device testing belongs to Milestone 13.
+Chrome on macOS is therefore the only browser and operating system exercised directly. The code is written to
+standards without browser or platform detection, but that is not a substitute for running it elsewhere, and the
+platforms above are reported as untested rather than assumed to work.
+
+## Deployment
+
+The game is a set of static files with no build step, so it is served as-is. It is deployed with GitHub Pages from
+the `main` branch and is live at <https://zohatayyab.github.io/whack-a-mole/>.
+
+To publish your own copy:
+
+1. Push the project to a GitHub repository.
+2. In that repository, open **Settings → Pages**.
+3. Under **Build and deployment**, choose **Deploy from a branch**, select the `main` branch and the `/ (root)`
+   folder, and save.
+4. The site publishes at `https://<username>.github.io/<repository>/`, usually within a minute or two.
+
+Every asset path in the project is relative, so the game runs correctly both from the subpath a GitHub Pages
+project site uses and from a domain root, with no configuration change.
 
 ## Roadmap
 
@@ -210,6 +233,7 @@ Cross-browser and device testing belongs to Milestone 13.
       game-over screens, and accessible navigation between them.
 - [x] **Milestone 12 — Visual identity and animation.** Illustrated scenery, board and character artwork, and a
       shared motion system for screen transitions, controls, and game feedback.
-- [ ] **Milestone 13 — Final testing, documentation, and GitHub Pages.** Cross-browser checks and deployment.
+- [x] **Milestone 13 — Final testing, documentation, and GitHub Pages.** Full regression, deployment
+      documentation, and publication with GitHub Pages.
 
 Milestones are implemented one at a time, each leaving the application in a working state.
