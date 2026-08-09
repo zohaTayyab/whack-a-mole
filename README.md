@@ -3,6 +3,8 @@
 A small browser game built with semantic HTML5, modern CSS, and vanilla JavaScript ES modules. No build step, no
 dependencies.
 
+![The Whack-a-Mole title screen, with the hand-drawn night-time scenery, the best-score badge and the Start Game and Settings buttons](screenshot.png)
+
 Development follows an incremental milestone workflow.
 
 ## Status
