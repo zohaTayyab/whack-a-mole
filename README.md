@@ -10,7 +10,8 @@ Development follows an incremental milestone workflow.
 ## Status
 
 Milestone 13 (final testing, documentation, and deployment) is complete. The game is published with GitHub Pages
-and playable at <https://zohatayyab.github.io/whack-a-mole/>. It is organised into four screens — title,
+and playable at <https://zohatayyab.github.io/whack-a-mole/>, and the same commit is also served by Netlify at
+<https://z-whack-a-mole-01.netlify.app/>. It is organised into four screens — title,
 game, settings, and game over — shown one at a time on a full-screen stage, set against hand-drawn scenery that
 shifts from day to night with the theme. Focus moves to a screen's heading as it opens, and Escape leaves the
 settings screen. A round lasts 60 seconds at every difficulty. Moles appear in random holes, one at a time, and
@@ -25,8 +26,8 @@ the best score and notes whether a record was set, with Play Again and Menu. The
 in portrait and landscape, from small phones to desktops. Backgrounding the page pauses the round and returns to
 it with the same remaining time; leaving and returning with the browser's Back button restores it ready to play.
 
-The site is deployed with GitHub Pages. The browsers, viewports, and input methods actually exercised — and those
-that were not — are listed under [Testing](#testing).
+The site is deployed with GitHub Pages and with Netlify, both from the `main` branch. The browsers, viewports, and
+input methods actually exercised — and those that were not — are listed under [Testing](#testing).
 
 ## Features
 
@@ -189,6 +190,12 @@ Verified on macOS 14.8.4 with Google Chrome 151 running headless:
 - The deployed GitHub Pages site, loaded in Google Chrome 151 on macOS outside headless mode: every asset resolves
   over the project subpath, no external request is made, the console stays clear on load, and a full round runs
   from the title screen through the countdown to game over, with focus landing on the game-over heading.
+- The deployed Netlify site, loaded in Google Chrome 151 on macOS outside headless mode: all fourteen project files
+  resolve from the domain root, no external request is made, the console stays clear on load, a full round runs
+  from the title screen through the countdown to game over, striking a visible mole raises the score, moving the
+  page to the background pauses the round, and the best score survives a reload. The browser's own request for
+  `/favicon.ico` is the only failed request, as the project supplies no icon file; the GitHub Pages site behaves
+  the same way.
 
 Not carried out:
 
@@ -204,16 +211,34 @@ platforms above are reported as untested rather than assumed to work.
 
 ## Deployment
 
-The game is a set of static files with no build step, so it is served as-is. It is deployed with GitHub Pages from
-the `main` branch and is live at <https://zohatayyab.github.io/whack-a-mole/>.
+The game is a set of static files with no build step, so it is served as-is. It is deployed twice from the `main`
+branch, and both deployments serve the same commit:
 
-To publish your own copy:
+| Host | Address |
+| --- | --- |
+| GitHub Pages | <https://zohatayyab.github.io/whack-a-mole/> |
+| Netlify | <https://z-whack-a-mole-01.netlify.app/> |
+
+To publish your own copy with GitHub Pages:
 
 1. Push the project to a GitHub repository.
 2. In that repository, open **Settings → Pages**.
 3. Under **Build and deployment**, choose **Deploy from a branch**, select the `main` branch and the `/ (root)`
    folder, and save.
 4. The site publishes at `https://<username>.github.io/<repository>/`, usually within a minute or two.
+
+To publish your own copy with Netlify:
+
+1. Push the project to a GitHub repository.
+2. In Netlify, link that repository — either when creating the project, or afterwards under **Project
+   configuration → Build & deploy → Repository**.
+3. Set the branch to `main` and leave both the build command and the publish directory empty, so the repository
+   root is served unchanged.
+4. Netlify redeploys on every push to `main`.
+
+Linking the repository is worth preferring over uploading a folder by hand. The deployment then holds exactly what
+is committed, so untracked local files cannot reach the public site, and an incomplete upload cannot leave the page
+without its stylesheets or its modules.
 
 Every asset path in the project is relative, so the game runs correctly both from the subpath a GitHub Pages
 project site uses and from a domain root, with no configuration change.
