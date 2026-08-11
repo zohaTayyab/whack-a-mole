@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Whack-a-Mole</title>
+  <!-- A tab icon is read at 16 pixels, so this is the mole reduced to the parts
+       that survive at that size: the head, the ears, the muzzle, and a heavy
+       outline. The whiskers, cheeks, and catch-lights of the in-game mole are
+       left out because they close up into noise. Colours are the mole's own,
+       written literally rather than as custom properties, since a favicon is
+       fetched on its own and inherits nothing from the page. The turf square
+       keeps the mole legible against both a light and a dark browser tab. -->
+  <rect width="64" height="64" rx="14" fill="#88ac69" />
+  <g fill="#9a7350" stroke="#2a1d13" stroke-width="3" stroke-linejoin="round">
+    <circle cx="17" cy="21" r="8.5" />
+    <circle cx="47" cy="21" r="8.5" />
+    <ellipse cx="32" cy="35" rx="22" ry="20" />
+  </g>
+  <ellipse cx="32" cy="42.5" rx="14" ry="10" fill="#f4ece0" />
+  <ellipse cx="23" cy="31" rx="3.6" ry="4.4" fill="#2a1d13" />
+  <ellipse cx="41" cy="31" rx="3.6" ry="4.4" fill="#2a1d13" />
+  <ellipse cx="32" cy="38.5" rx="4.6" ry="3.4" fill="#2a1d13" />
+  <path d="M26 45.5 Q32 50 38 45.5" fill="none" stroke="#2a1d13" stroke-width="2.4"
+        stroke-linecap="round" />
+</svg>

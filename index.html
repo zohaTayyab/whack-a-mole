@@ -8,6 +8,12 @@
       content="Whack-a-Mole, a browser game built with semantic HTML, CSS, and JavaScript."
     />
     <title>Whack-a-Mole</title>
+    <!-- The SVG icon is preferred where it is understood; the ICO carries 16,
+         32, and 48 pixel renderings for browsers that do not take one. Naming
+         both stops the browser requesting /favicon.ico on its own, which is a
+         request the site cannot answer from a project subpath. -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="stylesheet" href="styles/base.css" />
     <link rel="stylesheet" href="styles/game.css" />
     <script type="module" src="scripts/main.js"></script>

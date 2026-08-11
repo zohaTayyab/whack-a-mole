@@ -116,6 +116,8 @@ Testing is described under [Testing](#testing) below, including which checks cou
 
 ```
 index.html                   semantic markup                (complete)
+favicon.svg                  tab icon, scalable             (complete)
+favicon.ico                  tab icon, 16/32/48 fallback    (complete)
 styles/base.css              design tokens and themes       (complete)
 styles/game.css              layout and components          (complete)
 scripts/main.js              application entry point        (complete)
@@ -190,12 +192,13 @@ Verified on macOS 14.8.4 with Google Chrome 151 running headless:
 - The deployed GitHub Pages site, loaded in Google Chrome 151 on macOS outside headless mode: every asset resolves
   over the project subpath, no external request is made, the console stays clear on load, and a full round runs
   from the title screen through the countdown to game over, with focus landing on the game-over heading.
-- The deployed Netlify site, loaded in Google Chrome 151 on macOS outside headless mode: all fourteen project files
-  resolve from the domain root, no external request is made, the console stays clear on load, a full round runs
-  from the title screen through the countdown to game over, striking a visible mole raises the score, moving the
-  page to the background pauses the round, and the best score survives a reload. The browser's own request for
-  `/favicon.ico` is the only failed request, as the project supplies no icon file; the GitHub Pages site behaves
-  the same way.
+- The deployed Netlify site, loaded in Google Chrome 151 on macOS outside headless mode: every file the page
+  requests resolves from the domain root, no external request is made, the console stays clear on load, a full
+  round runs from the title screen through the countdown to game over, striking a visible mole raises the score,
+  moving the page to the background pauses the round, and the best score survives a reload.
+- The tab icon, served locally to Google Chrome 151: both icon files return their own media type, the browser
+  renders the SVG, and no request is made for an icon the page has not declared. The ICO carries 16, 32, and 48
+  pixel renderings for browsers that do not read SVG icons; those browsers were not available to test.
 
 Not carried out:
 
